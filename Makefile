@@ -1,5 +1,6 @@
 VPATH = kernel user boot tools
 BUILD = build
+.DEFAULT_GOAL := all
 
 CPPFLAGS += -Ikernel -Iuser -Iboot
 
@@ -8,6 +9,14 @@ OBJS = \
 	lapic.o log.o main.o mp.o picirq.o pipe.o proc.o sleeplock.o \
 	spinlock.o string.o swtch.o syscall.o sysfile.o sysproc.o trapasm.o \
 	trap.o uart.o vectors.o vm.o
+
+all: $(BUILD)/fs.img $(BUILD)/xv6.img organize-build
+
+organize-build: $(BUILD)/fs.img $(BUILD)/xv6.img | $(BUILD)
+	mkdir -p $(BUILD)/objects $(BUILD)/programs $(BUILD)/boot
+	for f in *.o *.d *.asm *.sym; do if test -e "$$f"; then mv -f "$$f" $(BUILD)/objects/; fi; done
+	for f in _*; do if test -f "$$f"; then mv -f "$$f" $(BUILD)/programs/; fi; done
+	for f in bootblock entryother initcode initcode.out xv6-kernel mkfs; do if test -e "$$f"; then mv -f "$$f" $(BUILD)/boot/; fi; done
 
 # Cross-compiling (e.g., on Mac OS X)
 # TOOLPREFIX = i386-jos-elf
