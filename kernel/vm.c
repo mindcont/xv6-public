@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/vm.c
+// 文件作用：实现 x86 分页、内核页表、用户地址空间和地址空间复制
+// 所属阶段：虚拟内存阶段
+//
 #include "param.h"
 #include "types.h"
 #include "defs.h"

@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：user/usys.S
+// 文件作用：提供用户态系统调用汇编存根，将请求转入内核
+// 所属阶段：系统调用入口阶段
+//
 #include "syscall.h"
 #include "traps.h"
 

@@ -1,4 +1,9 @@
 #!/usr/bin/perl -w
+# xv6 中文导读
+# 文件：boot/vectors.pl
+# 文件作用：生成 256 个中断向量入口的 Perl 脚本
+# 所属阶段：中断入口生成阶段
+#
 
 # Generate vectors.S, the trap/interrupt entry points.
 # There has to be one entry point per interrupt number
@@ -44,4 +49,5 @@ for(my $i = 0; $i < 256; $i++){
 #     .long vector1
 #     .long vector2
 #   ...
+
 

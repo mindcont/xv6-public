@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/exec.c
+// 文件作用：解析 ELF 用户程序并替换当前进程的地址空间
+// 所属阶段：程序加载阶段
+//
 #include "types.h"
 #include "param.h"
 #include "memlayout.h"

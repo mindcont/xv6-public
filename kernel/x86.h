@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/x86.h
+// 文件作用：kernel/x86.h 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // Routines to let C code use special x86 instructions.
 
 static inline uchar

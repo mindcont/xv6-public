@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/fs.h
+// 文件作用：kernel/fs.h 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // On-disk file system format.
 // Both the kernel and user programs use this header file.
 

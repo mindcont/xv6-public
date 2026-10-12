@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/uart.c
+// 文件作用：实现 UART 串口初始化、发送和接收
+// 所属阶段：设备驱动阶段
+//
 // Intel 8250 serial port (UART).
 
 #include "types.h"

@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/fs.c
+// 文件作用：实现 inode、目录、路径解析和磁盘文件内容操作
+// 所属阶段：文件系统阶段
+//
 // File system implementation.  Five layers:
 //   + Blocks: allocator for raw disk blocks.
 //   + Log: crash recovery for multi-step updates.

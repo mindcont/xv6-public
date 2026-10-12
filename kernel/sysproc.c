@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/sysproc.c
+// 文件作用：实现 fork、exit、wait、kill、sleep 等进程类系统调用
+// 所属阶段：系统调用阶段
+//
 #include "types.h"
 #include "x86.h"
 #include "defs.h"

@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/sleeplock.c
+// 文件作用：实现允许进程睡眠的锁，适合可能阻塞的文件系统操作
+// 所属阶段：并发与锁阶段
+//
 // Sleeping locks
 
 #include "types.h"

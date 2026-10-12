@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/lapic.c
+// 文件作用：kernel/lapic.c 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // The local APIC manages internal (non-I/O) interrupts.
 // See Chapter 8 & Appendix C of Intel processor manual volume 3.
 

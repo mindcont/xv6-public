@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/syscall.h
+// 文件作用：kernel/syscall.h 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // System call numbers
 #define SYS_fork    1
 #define SYS_exit    2

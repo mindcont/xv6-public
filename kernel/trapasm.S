@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/trapasm.S
+// 文件作用：保存和恢复陷阱现场，并连接汇编中断入口与 C 处理函数
+// 所属阶段：中断入口阶段
+//
 #include "mmu.h"
 
   # vectors.S sends all traps here.

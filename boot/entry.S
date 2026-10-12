@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：boot/entry.S
+// 文件作用：建立临时页表、打开分页、设置内核栈并进入内核 main()
+// 所属阶段：内核入口阶段
+//
 # The xv6 kernel starts executing in this file. This file is linked with
 # the kernel C code, so it can refer to kernel symbols such as main().
 # The boot block (bootasm.S and bootmain.c) jumps to entry below.

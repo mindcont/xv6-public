@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/syscall.c
+// 文件作用：根据系统调用号，将用户请求分派给具体内核函数
+// 所属阶段：系统调用阶段
+//
 #include "types.h"
 #include "defs.h"
 #include "param.h"

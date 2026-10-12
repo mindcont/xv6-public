@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：user/user.h
+// 文件作用：user/user.h 的声明、数据结构或实现代码
+// 所属阶段：用户程序阶段
+//
 struct stat;
 struct rtcdate;
 

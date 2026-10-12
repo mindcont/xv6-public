@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/bio.c
+// 文件作用：实现磁盘块缓存和块级并发访问
+// 所属阶段：文件系统阶段
+//
 // Buffer cache.
 //
 // The buffer cache is a linked list of buf structures holding

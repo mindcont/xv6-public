@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：boot/bootasm.S
+// 文件作用：启动扇区的早期 x86 汇编入口，切换到保护模式并调用 bootmain()
+// 所属阶段：设备加电后的 Bootloader 阶段
+//
 #include "asm.h"
 #include "memlayout.h"
 #include "mmu.h"

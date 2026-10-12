@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/sysfile.c
+// 文件作用：实现 open、read、write、pipe、exec 等文件和路径系统调用
+// 所属阶段：系统调用与文件阶段
+//
 //
 // File-system system calls.
 // Mostly argument checking, since we don't trust

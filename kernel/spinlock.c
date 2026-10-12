@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/spinlock.c
+// 文件作用：实现多 CPU 环境下的自旋锁
+// 所属阶段：并发与锁阶段
+//
 // Mutual exclusion spin locks.
 
 #include "types.h"

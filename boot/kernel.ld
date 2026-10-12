@@ -1,3 +1,8 @@
+/* xv6 中文导读
+ * 文件：boot/kernel.ld
+ * 文件作用：定义内核各段的链接地址和最终内核布局
+ * 所属阶段：内核链接阶段
+ */
 /* Simple linker script for the JOS kernel.
    See the GNU ld 'info' manual ("info ld") to learn the syntax. */
 

@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/console.c
+// 文件作用：实现控制台输入输出、键盘字符缓冲和控制台系统调用
+// 所属阶段：设备驱动阶段
+//
 // Console input and output.
 // Input is from the keyboard or serial port.
 // Output is written to the screen and serial port.

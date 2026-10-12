@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/kbd.c
+// 文件作用：将键盘扫描码转换为 xv6 使用的字符和控制键
+// 所属阶段：设备驱动阶段
+//
 #include "types.h"
 #include "x86.h"
 #include "defs.h"

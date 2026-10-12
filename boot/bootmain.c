@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：boot/bootmain.c
+// 文件作用：读取并解析内核 ELF，将内核段加载到内存后跳转到内核入口
+// 所属阶段：Bootloader 加载内核阶段
+//
 // Boot loader.
 //
 // Part of the boot block, along with bootasm.S, which calls bootmain().

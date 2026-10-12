@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：user/forktest.c
+// 文件作用：user/forktest.c 的声明、数据结构或实现代码
+// 所属阶段：用户程序阶段
+//
 // Test that fork fails gracefully.
 // Tiny executable so that the limit can be filling the proc table.
 

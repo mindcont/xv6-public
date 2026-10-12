@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/mp.c
+// 文件作用：kernel/mp.c 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // Multiprocessor support
 // Search memory for MP description structures.
 // http://developer.intel.com/design/pentium/datashts/24201606.pdf

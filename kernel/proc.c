@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/proc.c
+// 文件作用：实现进程控制块、进程创建、调度、睡眠、唤醒和退出
+// 所属阶段：进程与调度阶段
+//
 #include "types.h"
 #include "defs.h"
 #include "param.h"

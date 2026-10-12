@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/ide.c
+// 文件作用：实现 IDE 磁盘设备的读写和中断处理
+// 所属阶段：磁盘驱动阶段
+//
 // Simple PIO-based (non-DMA) IDE driver code.
 
 #include "types.h"

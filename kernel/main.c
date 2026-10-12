@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/main.c
+// 文件作用：内核总入口，按顺序初始化 CPU、内存、中断、设备、文件系统和进程
+// 所属阶段：内核初始化阶段
+//
 #include "types.h"
 #include "defs.h"
 #include "param.h"

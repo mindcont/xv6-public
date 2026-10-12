@@ -1,4 +1,9 @@
 #!/usr/bin/perl
+# xv6 中文导读
+# 文件：tools/pr.pl
+# 文件作用：文档打印格式化辅助脚本
+# 所属阶段：文档构建阶段
+#
 
 use POSIX qw(strftime);
 
@@ -34,3 +39,4 @@ for($i=0; $i<@lines; $i+=50){
 	print "$sheet\n";
 	print "\n\n";
 }
+

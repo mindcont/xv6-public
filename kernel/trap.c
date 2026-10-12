@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/trap.c
+// 文件作用：分发系统调用、时钟中断、设备中断和 CPU 异常
+// 所属阶段：中断与系统调用阶段
+//
 #include "types.h"
 #include "defs.h"
 #include "param.h"

@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：user/stressfs.c
+// 文件作用：user/stressfs.c 的声明、数据结构或实现代码
+// 所属阶段：用户程序阶段
+//
 // Demonstrate that moving the "acquire" in iderw after the loop that
 // appends to the idequeue results in a race.
 

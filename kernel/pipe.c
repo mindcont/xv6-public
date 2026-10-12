@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/pipe.c
+// 文件作用：kernel/pipe.c 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 #include "types.h"
 #include "defs.h"
 #include "param.h"

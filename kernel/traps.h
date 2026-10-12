@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/traps.h
+// 文件作用：kernel/traps.h 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // x86 trap and interrupt constants.
 
 // Processor-defined:

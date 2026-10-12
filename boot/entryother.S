@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：boot/entryother.S
+// 文件作用：为其他 CPU 提供启动入口，建立执行环境后进入 mpmain()
+// 所属阶段：多处理器启动阶段
+//
 #include "asm.h"
 #include "memlayout.h"
 #include "mmu.h"

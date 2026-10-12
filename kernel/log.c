@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/log.c
+// 文件作用：实现文件系统日志、事务提交和崩溃恢复
+// 所属阶段：文件系统阶段
+//
 #include "types.h"
 #include "defs.h"
 #include "param.h"

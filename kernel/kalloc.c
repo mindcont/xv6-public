@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/kalloc.c
+// 文件作用：实现物理内存页的分配和释放
+// 所属阶段：物理内存阶段
+//
 // Physical memory allocator, intended to allocate
 // memory for user processes, kernel stacks, page table pages,
 // and pipe buffers. Allocates 4096-byte pages.

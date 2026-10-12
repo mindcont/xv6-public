@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：tools/mkfs.c
+// 文件作用：在宿主机上创建 xv6 文件系统镜像并写入初始文件
+// 所属阶段：文件系统镜像构建阶段
+//
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>

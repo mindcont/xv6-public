@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/elf.h
+// 文件作用：kernel/elf.h 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // Format of an ELF executable file
 
 #define ELF_MAGIC 0x464C457FU  // "\x7FELF" in little endian

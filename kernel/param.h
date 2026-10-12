@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/param.h
+// 文件作用：kernel/param.h 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 #define NPROC        64  // maximum number of processes
 #define KSTACKSIZE 4096  // size of per-process kernel stack
 #define NCPU          8  // maximum number of CPUs

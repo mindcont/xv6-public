@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/memide.c
+// 文件作用：kernel/memide.c 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // Fake IDE disk; stores blocks in memory.
 // Useful for running kernel without scratch disk.
 

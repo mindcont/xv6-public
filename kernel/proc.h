@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/proc.h
+// 文件作用：定义进程状态、进程控制块和 CPU 相关数据结构
+// 所属阶段：进程与调度阶段
+//
 // Per-CPU state
 struct cpu {
   uchar apicid;                // Local APIC ID

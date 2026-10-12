@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：boot/initcode.S
+// 文件作用：第一个用户态程序，准备参数并通过 exec() 启动 /init
+// 所属阶段：第一个用户进程阶段
+//
 # Initial process execs /init.
 # This code runs in user space.
 

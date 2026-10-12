@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：kernel/mmu.h
+// 文件作用：kernel/mmu.h 的声明、数据结构或实现代码
+// 所属阶段：内核实现阶段
+//
 // This file contains definitions for the
 // x86 memory management unit (MMU).
 

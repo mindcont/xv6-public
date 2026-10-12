@@ -1,3 +1,8 @@
+// xv6 中文导读
+// 文件：user/init.c
+// 文件作用：第一个正式用户程序，初始化控制台并反复启动 Shell
+// 所属阶段：用户空间启动阶段
+//
 // init: The initial user-level program
 
 #include "types.h"
