@@ -675,7 +675,38 @@ Shell → 文件描述符 → 文件系统
 
 截至本计划整理时，MIT 2026 页面没有确认发布完整的 2026 年课堂录播。课程页面明确说明，部分未来日期的 notes/videos 链接是从 2025 年课程复制的材料，且 2026 年课堂要求现场参加。因此，视频学习应以往年公开视频为主，再与当前课程页面和教材对照。
 
-### 10.2 推荐的视频课程
+### 10.2 中文 xv6-riscv 书籍翻译
+
+本项目已将 [xv6-riscv-book-Chinese](https://github.com/zhenyu-zang/xv6-riscv-book-Chinese) 克隆到：
+
+```text
+references/xv6-riscv-book-Chinese/
+```
+
+这是 MIT 6.S081/6.828 使用的 xv6-riscv 教材的中文 Markdown 翻译，包含：
+
+```text
+Chapter-1.md  操作系统接口
+Chapter-2.md  操作系统组织
+Chapter-3.md  页表
+Chapter-4.md  陷阱和系统调用
+Chapter-5.md  中断和设备驱动
+Chapter-6.md  锁
+Chapter-7.md  调度
+Chapter-8.md  文件系统
+Chapter-9.md  并发
+```
+
+推荐阅读方式：
+
+1. 先阅读 `Chapter-1.md`，理解 Unix 接口和用户程序；
+2. 阅读每章时，对照当前仓库的 `kernel/`、`user/` 和 `boot/` 源码；
+3. 看到 RISC-V 专用内容时，参考本笔记的“xv6 x86 与 xv6-riscv 的差异”一节；
+4. 对于启动汇编、页表寄存器、中断入口和上下文切换，不把 RISC-V 代码直接套用到当前 x86 版本。
+
+该翻译仓库作为独立的第三方参考仓库保留在 `references/` 下，不纳入当前 xv6 主仓库的源码提交。
+
+### 10.3 推荐的视频课程
 
 #### MIT 6.S081 Fall 2020 中文字幕合集
 
@@ -756,3 +787,211 @@ RCU
 ```
 
 后续分析时，优先以当前仓库的实际源码为准；视频用于建立概念和阅读顺序，若视频中的 RISC-V 汇编、寄存器或文件路径与本仓库不一致，应明确区分架构差异。
+
+## 11. xv6 x86 与 xv6-riscv 的差异
+
+当前仓库是传统的 **xv6 x86** 版本，而 MIT 当前课程主要使用 **xv6-riscv**。两者的进程、系统调用、Shell、文件描述符和文件系统等高层设计相近，但启动、中断、页表和汇编代码差异明显。
+
+### 11.1 总体对照
+
+| 项目 | 当前 xv6 x86 | xv6-riscv |
+|---|---|---|
+| 指令集 | x86，CISC 风格 | RISC-V，RISC 风格 |
+| 常见位数 | 32 位 x86 | 64 位 RISC-V |
+| 寄存器示例 | `eax`、`esp`、`cr3` | `a0`、`sp`、`satp` |
+| 启动模式 | 实模式 → 保护模式 → 分页 | 机器模式/监督模式启动 |
+| 页表 | x86 两级页表 | Sv39 三级页表 |
+| 页表寄存器 | `cr3` | `satp` |
+| 中断机制 | IDT、PIC、APIC、IOAPIC | Trap、PLIC、CLINT |
+| 系统调用指令 | `int` | `ecall` |
+| 返回用户态 | `iret` | `sret` |
+| 多核启动 | MP 表和 APIC | SBI、CLINT 和 RISC-V 启动机制 |
+| 教学状态 | 老版本，已停止维护 | MIT 当前教学主线 |
+
+### 11.2 源码文件对应关系
+
+| 学习主题 | 当前 x86 版本 | xv6-riscv 版本 |
+|---|---|---|
+| 启动汇编 | `boot/bootasm.S` | `kernel/entry.S` |
+| Bootloader | `boot/bootmain.c` | RISC-V 启动代码和 QEMU 加载流程 |
+| 内核入口 | `boot/entry.S` | `kernel/start.c`、`kernel/main.c` |
+| 其他 CPU 启动 | `boot/entryother.S` | RISC-V 多核启动代码 |
+| 第一个用户程序 | `boot/initcode.S` | `user/initcode.S` |
+| 中断入口 | `kernel/trapasm.S` | `kernel/trampoline.S` |
+| 中断处理 | `kernel/trap.c` | `kernel/trap.c` |
+| 页表 | `kernel/vm.c`、`kernel/mmu.h` | `kernel/vm.c`、`kernel/riscv.h` |
+| 上下文切换 | `kernel/swtch.S` | `kernel/swtch.S` |
+| 本地中断控制 | `kernel/lapic.c` | `kernel/` 中的 RISC-V 中断支持 |
+| 外部设备中断 | `kernel/ioapic.c`、`kernel/picirq.c` | `kernel/plic.c` |
+| 系统调用入口 | `user/usys.S`、`kernel/trapasm.S` | `user/usys.pl`、`kernel/trampoline.S` |
+
+### 11.3 启动流程差异
+
+当前 x86 版本：
+
+```text
+BIOS/QEMU
+→ boot/bootasm.S
+→ 实模式转保护模式
+→ boot/bootmain.c 加载 ELF 内核
+→ boot/entry.S 建立临时页表
+→ kernel/main.c
+```
+
+xv6-riscv：
+
+```text
+QEMU/RISC-V 启动环境
+→ kernel/entry.S
+→ kernel/start.c
+→ 设置权限级别、栈和页表
+→ kernel/main.c
+```
+
+x86 启动过程需要显式处理实模式、保护模式、段寄存器和 BIOS 启动扇区；RISC-V 启动过程更直接，重点转向特权级别、CSR、页表和 trampoline。
+
+### 11.4 页表差异
+
+x86 版本重点阅读：
+
+```text
+kernel/vm.c
+kernel/mmu.h
+kernel/memlayout.h
+boot/entry.S
+```
+
+重点概念：
+
+```text
+cr3
+PDE
+PTE
+两级页表
+```
+
+xv6-riscv 版本重点阅读：
+
+```text
+kernel/vm.c
+kernel/riscv.h
+kernel/memlayout.h
+kernel/trampoline.S
+```
+
+重点概念：
+
+```text
+satp
+Sv39
+三级页表
+用户态和内核态切换
+```
+
+两种架构的共同思想都是：
+
+```text
+虚拟地址
+→ 页表查找
+→ 物理地址
+```
+
+### 11.5 系统调用差异
+
+x86 版本的典型路径：
+
+```text
+user/usys.S
+→ int T_SYSCALL
+→ kernel/trapasm.S
+→ kernel/trap.c
+→ kernel/syscall.c
+```
+
+xv6-riscv 的典型路径：
+
+```text
+user/usys.pl 生成的系统调用存根
+→ ecall
+→ kernel/trampoline.S
+→ kernel/trap.c
+→ kernel/syscall.c
+```
+
+`fork()`、`exec()`、`read()`、`write()` 等系统调用的内核语义基本相同，主要差异在于寄存器、陷阱帧和进入/退出内核的汇编代码。
+
+### 11.6 中断和设备差异
+
+x86 使用：
+
+```text
+IDT
+PIC
+APIC
+IOAPIC
+```
+
+主要对应文件：
+
+```text
+kernel/trap.c
+kernel/trapasm.S
+kernel/lapic.c
+kernel/ioapic.c
+kernel/picirq.c
+```
+
+RISC-V 使用：
+
+```text
+Trap
+PLIC
+CLINT
+```
+
+主要对应文件：
+
+```text
+kernel/trap.c
+kernel/trampoline.S
+kernel/plic.c
+kernel/uart.c
+```
+
+### 11.7 哪些内容可以直接对照
+
+以下内容在两个版本中具有较强的可迁移性：
+
+- 用户程序和 Shell；
+- `fork()`、`exec()`、`exit()`、`wait()`；
+- 进程状态和调度器思想；
+- 文件描述符和管道；
+- inode、目录和文件系统日志；
+- 自旋锁、睡眠锁和进程同步；
+- 用户态与内核态的隔离思想。
+
+以下内容必须结合架构重新阅读：
+
+- 启动汇编；
+- 中断入口和返回用户态；
+- 页表格式和地址转换；
+- 上下文切换汇编；
+- 多核启动；
+- APIC 与 PLIC/CLINT；
+- 设备寄存器访问。
+
+### 11.8 推荐学习路线
+
+```text
+当前 xv6 x86
+→ Shell 和系统调用
+→ 进程与调度
+→ 文件描述符和文件系统
+→ 虚拟内存基本概念
+→ xv6-riscv 教材
+→ 对照启动、中断、页表和汇编差异
+```
+
+一句话总结：
+
+> xv6 x86 和 xv6-riscv 的操作系统思想基本相同，区别主要集中在 CPU 启动、汇编、寄存器、页表、中断和多核硬件接口。

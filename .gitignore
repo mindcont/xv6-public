@@ -17,3 +17,4 @@ mkfs
 # Build output
 build/
 xv6-kernel
+references/xv6-riscv-book-Chinese/
