@@ -98,7 +98,44 @@ main.c
 
 ### 实践任务
 
-- 编译并启动 xv6；
+- 在 WSL2 Ubuntu 中编译并启动 xv6：
+
+  ```bash
+  cd /mnt/d/xv6-public
+  make TOOLPREFIX= qemu-nox
+  ```
+
+  编译产物位于 `build/`，成功启动后应看到：
+
+  ```text
+  init: starting sh
+  $
+  ```
+
+- 如果已经完成编译，只想再次启动，可以直接执行：
+
+  ```bash
+  make TOOLPREFIX= qemu-nox
+  ```
+
+- 启动带 QEMU 图形窗口的版本：
+
+  ```bash
+  make TOOLPREFIX= qemu
+  ```
+
+- 启动 GDB 调试版本：
+
+  ```bash
+  make TOOLPREFIX= qemu-nox-gdb
+  ```
+
+- 清理编译产物：
+
+  ```bash
+  make TOOLPREFIX= clean
+  ```
+
 - 在 Shell 中运行 `ls`、`cat README`、`echo hello`；
 - 阅读 `Makefile` 中 `kernel`、`fs.img`、`xv6.img` 和 `qemu` 的规则；
 - 记录内核初始化函数的调用顺序。

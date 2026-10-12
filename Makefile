@@ -1,4 +1,5 @@
 VPATH = kernel user boot tools
+BUILD = build
 
 CPPFLAGS += -Ikernel -Iuser -Iboot
 
@@ -57,6 +58,12 @@ LD = $(TOOLPREFIX)ld
 OBJCOPY = $(TOOLPREFIX)objcopy
 OBJDUMP = $(TOOLPREFIX)objdump
 CFLAGS = -fno-pic -static -fno-builtin -fno-strict-aliasing -O2 -Wall -MD -ggdb -m32 -Werror -fno-omit-frame-pointer
+# user/sh.c deliberately walks the command tree recursively in runcmd().
+# Newer GCC versions diagnose this valid recursion as infinite recursion.
+CFLAGS += -Wno-infinite-recursion
+# The x86 MP table code intentionally converts fixed physical addresses to
+# pointers; newer GCC versions can report false array-bounds diagnostics.
+CFLAGS += -Wno-array-bounds
 CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 && echo -fno-stack-protector)
 ASFLAGS = -m32 -gdwarf-2 -Wa,-divide
 # FreeBSD ld wants ``elf_i386_fbsd''
@@ -70,15 +77,18 @@ ifneq ($(shell $(CC) -dumpspecs 2>/dev/null | grep -e '[^f]nopie'),)
 CFLAGS += -fno-pie -nopie
 endif
 
-xv6.img: bootblock kernel
-	dd if=/dev/zero of=xv6.img count=10000
-	dd if=bootblock of=xv6.img conv=notrunc
-	dd if=kernel of=xv6.img seek=1 conv=notrunc
+$(BUILD):
+	mkdir -p $(BUILD)
 
-xv6memfs.img: bootblock kernelmemfs
-	dd if=/dev/zero of=xv6memfs.img count=10000
-	dd if=bootblock of=xv6memfs.img conv=notrunc
-	dd if=kernelmemfs of=xv6memfs.img seek=1 conv=notrunc
+$(BUILD)/xv6.img: bootblock xv6-kernel | $(BUILD)
+	dd if=/dev/zero of=$(BUILD)/xv6.img count=10000
+	dd if=bootblock of=$(BUILD)/xv6.img conv=notrunc
+	dd if=xv6-kernel of=$(BUILD)/xv6.img seek=1 conv=notrunc
+
+$(BUILD)/xv6memfs.img: bootblock kernelmemfs | $(BUILD)
+	dd if=/dev/zero of=$(BUILD)/xv6memfs.img count=10000
+	dd if=bootblock of=$(BUILD)/xv6memfs.img conv=notrunc
+	dd if=kernelmemfs of=$(BUILD)/xv6memfs.img seek=1 conv=notrunc
 
 bootblock: boot/bootasm.S boot/bootmain.c
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fno-pic -O -nostdinc -c boot/bootmain.c -o bootmain.o
@@ -86,7 +96,7 @@ bootblock: boot/bootasm.S boot/bootmain.c
 	$(LD) $(LDFLAGS) -N -e start -Ttext 0x7C00 -o bootblock.o bootasm.o bootmain.o
 	$(OBJDUMP) -S bootblock.o > bootblock.asm
 	$(OBJCOPY) -S -O binary -j .text bootblock.o bootblock
-	./tools/sign.pl bootblock
+	perl tools/sign.pl bootblock
 
 entryother: boot/entryother.S
 	$(CC) $(CFLAGS) $(CPPFLAGS) -fno-pic -nostdinc -c boot/entryother.S -o entryother.o
@@ -100,10 +110,10 @@ initcode: boot/initcode.S
 	$(OBJCOPY) -S -O binary initcode.out initcode
 	$(OBJDUMP) -S initcode.o > initcode.asm
 
-kernel: $(OBJS) entry.o entryother initcode boot/kernel.ld
-	$(LD) $(LDFLAGS) -T boot/kernel.ld -o kernel entry.o $(OBJS) -b binary initcode entryother
-	$(OBJDUMP) -S kernel > kernel.asm
-	$(OBJDUMP) -t kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
+xv6-kernel: $(OBJS) entry.o entryother initcode boot/kernel.ld
+	$(LD) $(LDFLAGS) -T boot/kernel.ld -o xv6-kernel entry.o $(OBJS) -b binary initcode entryother
+	$(OBJDUMP) -S xv6-kernel > kernel.asm
+	$(OBJDUMP) -t xv6-kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > kernel.sym
 
 # kernelmemfs is a copy of kernel that maintains the
 # disk image in memory instead of writing to a disk.
@@ -137,7 +147,7 @@ _forktest: forktest.o $(ULIB)
 	$(OBJDUMP) -S _forktest > forktest.asm
 
 mkfs: tools/mkfs.c kernel/fs.h
-	gcc -Werror -Wall -Ikernel -o mkfs tools/mkfs.c
+	gcc -Werror -Wall -iquote kernel -o mkfs tools/mkfs.c
 
 # Prevent deletion of intermediate files, e.g. cat.o, after first build, so
 # that disk image changes after first build are persistent until clean.  More
@@ -162,16 +172,17 @@ UPROGS=\
 	_wc\
 	_zombie\
 
-fs.img: mkfs README $(UPROGS)
-	./mkfs fs.img README $(UPROGS)
+$(BUILD)/fs.img: mkfs README $(UPROGS) | $(BUILD)
+	./mkfs $(BUILD)/fs.img README $(UPROGS)
 
 -include *.d
 
 clean: 
 	rm -f *.tex *.dvi *.idx *.aux *.log *.ind *.ilg \
 	*.o *.d *.asm *.sym vectors.S bootblock entryother \
-	initcode initcode.out kernel xv6.img fs.img kernelmemfs \
-	xv6memfs.img mkfs .gdbinit \
+	initcode initcode.out xv6-kernel kernelmemfs \
+	mkfs .gdbinit
+	rm -rf $(BUILD) \
 	$(UPROGS)
 
 # make a printout
@@ -186,7 +197,7 @@ print: xv6.pdf
 
 # run in emulators
 
-bochs : fs.img xv6.img
+bochs : $(BUILD)/fs.img $(BUILD)/xv6.img
 	if [ ! -e .bochsrc ]; then ln -s docs/dot-bochsrc .bochsrc; fi
 	bochs -q
 
@@ -199,25 +210,25 @@ QEMUGDB = $(shell if $(QEMU) -help | grep -q '^-gdb'; \
 ifndef CPUS
 CPUS := 2
 endif
-QEMUOPTS = -drive file=fs.img,index=1,media=disk,format=raw -drive file=xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
+QEMUOPTS = -drive file=$(BUILD)/fs.img,index=1,media=disk,format=raw -drive file=$(BUILD)/xv6.img,index=0,media=disk,format=raw -smp $(CPUS) -m 512 $(QEMUEXTRA)
 
-qemu: fs.img xv6.img
+qemu: $(BUILD)/fs.img $(BUILD)/xv6.img
 	$(QEMU) -serial mon:stdio $(QEMUOPTS)
 
-qemu-memfs: xv6memfs.img
-	$(QEMU) -drive file=xv6memfs.img,index=0,media=disk,format=raw -smp $(CPUS) -m 256
+qemu-memfs: $(BUILD)/xv6memfs.img
+	$(QEMU) -drive file=$(BUILD)/xv6memfs.img,index=0,media=disk,format=raw -smp $(CPUS) -m 256
 
-qemu-nox: fs.img xv6.img
+qemu-nox: $(BUILD)/fs.img $(BUILD)/xv6.img
 	$(QEMU) -nographic $(QEMUOPTS)
 
 .gdbinit: .gdbinit.tmpl
 	sed "s/localhost:1234/localhost:$(GDBPORT)/" < $^ > $@
 
-qemu-gdb: fs.img xv6.img .gdbinit
+qemu-gdb: $(BUILD)/fs.img $(BUILD)/xv6.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -serial mon:stdio $(QEMUOPTS) -S $(QEMUGDB)
 
-qemu-nox-gdb: fs.img xv6.img .gdbinit
+qemu-nox-gdb: $(BUILD)/fs.img $(BUILD)/xv6.img .gdbinit
 	@echo "*** Now run 'gdb'." 1>&2
 	$(QEMU) -nographic $(QEMUOPTS) -S $(QEMUGDB)
 

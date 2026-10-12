@@ -14,3 +14,6 @@ kernel
 kernelmemfs
 mkfs
 .gdbinit
+# Build output
+build/
+xv6-kernel
