@@ -20,6 +20,7 @@
 void readseg(uchar*, uint, uint);
 
 void
+// 中文说明：读取内核 ELF 并把各段加载到内存，完成 Bootloader 到内核的跳转。
 bootmain(void)
 {
   struct elfhdr *elf;

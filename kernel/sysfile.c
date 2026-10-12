@@ -288,6 +288,7 @@ create(char *path, short type, short major, short minor)
 }
 
 int
+// 中文说明：系统调用入口：打开或创建文件并返回文件描述符。
 sys_open(void)
 {
   char *path;
@@ -399,6 +400,7 @@ sys_chdir(void)
 }
 
 int
+// 中文说明：系统调用入口：加载并执行指定路径的用户程序。
 sys_exec(void)
 {
   char *path, *argv[MAXARG];

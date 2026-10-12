@@ -13,6 +13,7 @@
 #include "proc.h"
 
 int
+// 中文说明：系统调用入口：调用内核 fork 创建子进程。
 sys_fork(void)
 {
   return fork();

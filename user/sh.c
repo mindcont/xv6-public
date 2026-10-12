@@ -60,6 +60,7 @@ struct cmd *parsecmd(char*);
 
 // Execute cmd.  Never returns.
 void
+// 中文说明：递归执行命令树，处理简单命令、重定向、管道和后台命令。
 runcmd(struct cmd *cmd)
 {
   int p[2];
@@ -147,6 +148,7 @@ getcmd(char *buf, int nbuf)
 }
 
 int
+// 中文说明：读取命令行、解析命令，并创建子进程执行命令。
 main(void)
 {
   static char buf[100];
@@ -330,6 +332,7 @@ struct cmd *parseexec(char**, char*);
 struct cmd *nulterminate(struct cmd*);
 
 struct cmd*
+// 中文说明：把一行 Shell 文本解析为命令树。
 parsecmd(char *s)
 {
   char *es;

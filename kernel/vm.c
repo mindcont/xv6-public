@@ -121,6 +121,7 @@ static struct kmap {
 
 // Set up kernel part of a page table.
 pde_t*
+// 中文说明：创建并填充一个进程使用的内核地址空间页表。
 setupkvm(void)
 {
   pde_t *pgdir;
@@ -143,6 +144,7 @@ setupkvm(void)
 // Allocate one page table for the machine for the kernel address
 // space for scheduler processes.
 void
+// 中文说明：建立全局内核页表并切换当前 CPU 使用它。
 kvmalloc(void)
 {
   kpgdir = setupkvm();
@@ -159,6 +161,7 @@ switchkvm(void)
 
 // Switch TSS and h/w page table to correspond to process p.
 void
+// 中文说明：切换到指定进程的用户页表和内核栈。
 switchuvm(struct proc *p)
 {
   if(p == 0)
@@ -318,6 +321,7 @@ clearpteu(pde_t *pgdir, char *uva)
 // Given a parent process's page table, create a copy
 // of it for a child.
 pde_t*
+// 中文说明：复制父进程的用户地址空间，用于传统 fork。
 copyuvm(pde_t *pgdir, uint sz)
 {
   pde_t *d;

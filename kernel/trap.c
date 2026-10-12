@@ -39,6 +39,7 @@ idtinit(void)
 
 //PAGEBREAK: 41
 void
+// 中文说明：统一处理系统调用、时钟中断、设备中断和 CPU 异常。
 trap(struct trapframe *tf)
 {
   if(tf->trapno == T_SYSCALL){

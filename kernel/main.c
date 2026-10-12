@@ -20,6 +20,7 @@ extern char end[]; // first address after kernel loaded from ELF file
 // Allocate a real stack and switch to it, first
 // doing some setup required for memory allocator to work.
 int
+// 中文说明：内核启动总入口，按顺序初始化 CPU、内存、中断、设备、文件系统和进程。
 main(void)
 {
   kinit1(end, P2V(4*1024*1024)); // phys page allocator
@@ -54,6 +55,7 @@ mpenter(void)
 
 // Common CPU setup code.
 static void
+// 中文说明：每个 CPU 的内核主流程，完成本 CPU 初始化后进入调度器。
 mpmain(void)
 {
   cprintf("cpu%d: starting %d\n", cpuid(), cpuid());
@@ -66,6 +68,7 @@ pde_t entrypgdir[];  // For entry.S
 
 // Start the non-boot (AP) processors.
 static void
+// 中文说明：复制并启动其他 CPU 的入口代码，为每个 AP 配置栈和启动参数。
 startothers(void)
 {
   extern uchar _binary_entryother_start[], _binary_entryother_size[];

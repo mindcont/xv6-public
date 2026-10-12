@@ -29,6 +29,7 @@ fileinit(void)
 
 // Allocate a file structure.
 struct file*
+// 中文说明：从全局文件表中分配一个新的文件对象。
 filealloc(void)
 {
   struct file *f;
@@ -99,6 +100,7 @@ filestat(struct file *f, struct stat *st)
 
 // Read from file f.
 int
+// 中文说明：根据文件对象类型读取 inode、设备或管道中的数据。
 fileread(struct file *f, char *addr, int n)
 {
   int r;
@@ -120,6 +122,7 @@ fileread(struct file *f, char *addr, int n)
 //PAGEBREAK!
 // Write to file f.
 int
+// 中文说明：根据文件对象类型写入 inode、设备或管道。
 filewrite(struct file *f, char *addr, int n)
 {
   int r;

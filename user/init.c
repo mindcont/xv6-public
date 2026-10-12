@@ -13,6 +13,7 @@
 char *argv[] = { "sh", 0 };
 
 int
+// 中文说明：初始化控制台文件描述符，并循环创建和等待 Shell。
 main(void)
 {
   int pid, wpid;

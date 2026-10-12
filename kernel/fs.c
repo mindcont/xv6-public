@@ -455,6 +455,7 @@ stati(struct inode *ip, struct stat *st)
 // Read data from inode.
 // Caller must hold ip->lock.
 int
+// 中文说明：从 inode 对应的文件内容中读取指定范围。
 readi(struct inode *ip, char *dst, uint off, uint n)
 {
   uint tot, m;
@@ -484,6 +485,7 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 // Write data to inode.
 // Caller must hold ip->lock.
 int
+// 中文说明：向 inode 对应的文件内容写入指定范围。
 writei(struct inode *ip, char *src, uint off, uint n)
 {
   uint tot, m;
@@ -662,6 +664,7 @@ namex(char *path, int nameiparent, char *name)
 }
 
 struct inode*
+// 中文说明：解析路径字符串，找到对应的 inode。
 namei(char *path)
 {
   char name[DIRSIZ];

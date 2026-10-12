@@ -76,6 +76,7 @@ myproc(void) {
 // state required to run in the kernel.
 // Otherwise return 0.
 static struct proc*
+// 中文说明：从进程表中分配一个新进程控制块，并准备内核栈和上下文。
 allocproc(void)
 {
   struct proc *p;
@@ -123,6 +124,7 @@ found:
 //PAGEBREAK: 32
 // Set up first user process.
 void
+// 中文说明：创建第一个用户进程，并把 initcode 放入其用户地址空间。
 userinit(void)
 {
   struct proc *p;
@@ -183,6 +185,7 @@ growproc(int n)
 // Sets up stack to return as if from system call.
 // Caller must set state of returned proc to RUNNABLE.
 int
+// 中文说明：复制当前进程的地址空间和资源，创建一个新的子进程。
 fork(void)
 {
   int i, pid;
@@ -230,6 +233,7 @@ fork(void)
 // An exited process remains in the zombie state
 // until its parent calls wait() to find out it exited.
 void
+// 中文说明：结束当前进程，关闭资源并唤醒等待它的父进程。
 exit(void)
 {
   struct proc *curproc = myproc();
@@ -275,6 +279,7 @@ exit(void)
 // Wait for a child process to exit and return its pid.
 // Return -1 if this process has no children.
 int
+// 中文说明：等待子进程退出，回收僵尸进程的内核资源。
 wait(void)
 {
   struct proc *p;
@@ -325,6 +330,7 @@ wait(void)
 //  - eventually that process transfers control
 //      via swtch back to the scheduler.
 void
+// 中文说明：在可运行进程中选择下一个进程并进行上下文切换。
 scheduler(void)
 {
   struct proc *p;
@@ -420,6 +426,7 @@ forkret(void)
 // Atomically release lock and sleep on chan.
 // Reacquires lock when awakened.
 void
+// 中文说明：原子地释放锁并让当前进程睡眠，等待指定条件发生。
 sleep(void *chan, struct spinlock *lk)
 {
   struct proc *p = myproc();
@@ -460,6 +467,7 @@ sleep(void *chan, struct spinlock *lk)
 // Wake up all processes sleeping on chan.
 // The ptable lock must be held.
 static void
+// 中文说明：唤醒等待指定通道的进程。
 wakeup1(void *chan)
 {
   struct proc *p;

@@ -13,6 +13,7 @@
 #include "elf.h"
 
 int
+// 中文说明：读取 ELF 用户程序，建立新地址空间并替换当前进程映像。
 exec(char *path, char **argv)
 {
   char *s, *last;

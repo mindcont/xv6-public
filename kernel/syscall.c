@@ -134,6 +134,7 @@ static int (*syscalls[])(void) = {
 };
 
 void
+// 中文说明：读取系统调用号和参数，并分派到对应的内核实现。
 syscall(void)
 {
   int num;
