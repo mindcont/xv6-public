@@ -10,7 +10,7 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#define stat xv6_stat  // avoid clash with host struct stat
+#define stat xv6_stat  // avoid clash with host struct stat；避免与宿主机 struct stat 冲突
 #include "types.h"
 #include "fs.h"
 #include "stat.h"
@@ -24,12 +24,13 @@
 
 // Disk layout:
 // [ boot block | sb block | log | inode blocks | free bit map | data blocks ]
+// 磁盘布局：启动块 | 超级块 | 日志 | inode 块 | 空闲位图 | 数据块。
 
 int nbitmap = FSSIZE/(BSIZE*8) + 1;
 int ninodeblocks = NINODES / IPB + 1;
 int nlog = LOGSIZE;
-int nmeta;    // Number of meta blocks (boot, sb, nlog, inode, bitmap)
-int nblocks;  // Number of data blocks
+int nmeta;    // Number of meta blocks (boot, sb, nlog, inode, bitmap)；元数据块数量
+int nblocks;  // Number of data blocks；数据块数量
 
 int fsfd;
 struct superblock sb;
@@ -47,6 +48,7 @@ uint ialloc(ushort type);
 void iappend(uint inum, void *p, int n);
 
 // convert to intel byte order
+// 转换为 Intel 小端字节序。
 ushort
 xshort(ushort x)
 {
@@ -95,7 +97,7 @@ main(int argc, char *argv[])
     exit(1);
   }
 
-  // 1 fs block = 1 disk sector
+  // 1 fs block = 1 disk sector；一个文件系统块等于一个磁盘扇区
   nmeta = 2 + nlog + ninodeblocks + nbitmap;
   nblocks = FSSIZE - nmeta;
 
@@ -141,9 +143,13 @@ main(int argc, char *argv[])
     }
 
     // Skip leading _ in name when writing to file system.
+    // 写入文件系统时跳过文件名开头的下划线。
     // The binaries are named _rm, _cat, etc. to keep the
+    // 这些二进制文件被命名为 _rm、_cat 等，以避免
     // build operating system from trying to execute them
+    // 构建宿主操作系统误把它们当作
     // in place of system binaries like rm and cat.
+    // rm、cat 等系统命令来执行。
     if(argv[i][0] == '_')
       ++argv[i];
 
@@ -160,7 +166,7 @@ main(int argc, char *argv[])
     close(fd);
   }
 
-  // fix size of root inode dir
+  // fix size of root inode dir；修正根目录 inode 的大小
   rinode(rootino, &din);
   off = xint(din.size);
   off = ((off/BSIZE) + 1) * BSIZE;

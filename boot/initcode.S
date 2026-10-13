@@ -4,7 +4,7 @@
 // 所属阶段：第一个用户进程阶段
 //
 # Initial process execs /init.
-# This code runs in user space.
+# 第一个进程通过 exec() 启动 /init；这段代码运行在用户态。
 
 #include "syscall.h"
 #include "traps.h"
@@ -15,7 +15,7 @@
 start:
   pushl $argv
   pushl $init
-  pushl $0  // where caller pc would be
+  pushl $0  // where caller pc would be；伪造调用者程序计数器的位置
   movl $SYS_exec, %eax
   int $T_SYSCALL
 

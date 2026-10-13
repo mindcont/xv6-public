@@ -4,10 +4,11 @@
 // 所属阶段：内核实现阶段
 //
 // PC keyboard interface constants
+// PC 键盘接口常量。
 
-#define KBSTATP         0x64    // kbd controller status port(I)
-#define KBS_DIB         0x01    // kbd data in buffer
-#define KBDATAP         0x60    // kbd data port(I)
+#define KBSTATP         0x64    // kbd controller status port(I)；键盘控制器状态端口
+#define KBS_DIB         0x01    // kbd data in buffer；键盘数据缓冲区有数据
+#define KBDATAP         0x60    // kbd data port(I)；键盘数据端口
 
 #define NO              0
 
@@ -21,7 +22,7 @@
 
 #define E0ESC           (1<<6)
 
-// Special keycodes
+// Special keycodes；特殊按键扫描码
 #define KEY_HOME        0xE0
 #define KEY_END         0xE1
 #define KEY_UP          0xE2
@@ -33,7 +34,7 @@
 #define KEY_INS         0xE8
 #define KEY_DEL         0xE9
 
-// C('A') == Control-A
+// C('A') == Control-A；C('A') 表示 Control-A
 #define C(x) (x - '@')
 
 static uchar shiftcode[256] =
@@ -66,8 +67,8 @@ static uchar normalmap[256] =
   NO,   NO,   NO,   NO,   NO,   NO,   NO,   '7',  // 0x40
   '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
   '2',  '3',  '0',  '.',  NO,   NO,   NO,   NO,   // 0x50
-  [0x9C] '\n',      // KP_Enter
-  [0xB5] '/',       // KP_Div
+  [0x9C] '\n',      // KP_Enter；数字键盘回车
+  [0xB5] '/',       // KP_Div；数字键盘除法
   [0xC8] KEY_UP,    [0xD0] KEY_DN,
   [0xC9] KEY_PGUP,  [0xD1] KEY_PGDN,
   [0xCB] KEY_LF,    [0xCD] KEY_RT,
@@ -88,8 +89,8 @@ static uchar shiftmap[256] =
   NO,   NO,   NO,   NO,   NO,   NO,   NO,   '7',  // 0x40
   '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
   '2',  '3',  '0',  '.',  NO,   NO,   NO,   NO,   // 0x50
-  [0x9C] '\n',      // KP_Enter
-  [0xB5] '/',       // KP_Div
+  [0x9C] '\n',      // KP_Enter；数字键盘回车
+  [0xB5] '/',       // KP_Div；数字键盘除法
   [0xC8] KEY_UP,    [0xD0] KEY_DN,
   [0xC9] KEY_PGUP,  [0xD1] KEY_PGDN,
   [0xCB] KEY_LF,    [0xCD] KEY_RT,
@@ -106,8 +107,8 @@ static uchar ctlmap[256] =
   C('D'),  C('F'),  C('G'),  C('H'),  C('J'),  C('K'),  C('L'),  NO,
   NO,      NO,      NO,      C('\\'), C('Z'),  C('X'),  C('C'),  C('V'),
   C('B'),  C('N'),  C('M'),  NO,      NO,      C('/'),  NO,      NO,
-  [0x9C] '\r',      // KP_Enter
-  [0xB5] C('/'),    // KP_Div
+  [0x9C] '\r',      // KP_Enter；数字键盘回车
+  [0xB5] C('/'),    // KP_Div；数字键盘除法
   [0xC8] KEY_UP,    [0xD0] KEY_DN,
   [0xC9] KEY_PGUP,  [0xD1] KEY_PGDN,
   [0xCB] KEY_LF,    [0xCD] KEY_RT,

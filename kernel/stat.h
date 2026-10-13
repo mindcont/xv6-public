@@ -8,9 +8,9 @@
 #define T_DEV  3   // Device
 
 struct stat {
-  short type;  // Type of file
-  int dev;     // File system's disk device
-  uint ino;    // Inode number
-  short nlink; // Number of links to file
-  uint size;   // Size of file in bytes
+  short type;  // Type of file；文件类型
+  int dev;     // File system's disk device；文件系统磁盘设备
+  uint ino;    // Inode number；inode 编号
+  short nlink; // Number of links to file；指向文件的链接数
+  uint size;   // Size of file in bytes；文件大小（字节）
 };

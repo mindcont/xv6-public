@@ -4,6 +4,7 @@
 // 所属阶段：用户空间启动阶段
 //
 // init: The initial user-level program
+// init：第一个用户态程序。
 
 #include "types.h"
 #include "stat.h"
@@ -22,8 +23,8 @@ main(void)
     mknod("console", 1, 1);
     open("console", O_RDWR);
   }
-  dup(0);  // stdout
-  dup(0);  // stderr
+  dup(0);  // stdout；标准输出
+  dup(0);  // stderr；标准错误
 
   for(;;){
     printf(1, "init: starting sh\n");

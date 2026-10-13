@@ -4,7 +4,9 @@
 // 所属阶段：用户程序阶段
 //
 // Test that fork fails gracefully.
+// 测试 fork 失败时是否能够正常返回错误。
 // Tiny executable so that the limit can be filling the proc table.
+// 使用很小的可执行程序，便于快速填满进程表并触达进程数量限制。
 
 #include "types.h"
 #include "stat.h"

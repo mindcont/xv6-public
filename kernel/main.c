@@ -14,33 +14,35 @@
 static void startothers(void);
 static void mpmain(void)  __attribute__((noreturn));
 extern pde_t *kpgdir;
-extern char end[]; // first address after kernel loaded from ELF file
+extern char end[]; // first address after kernel loaded from ELF file；ELF 加载内核后的第一个地址
 
 // Bootstrap processor starts running C code here.
 // Allocate a real stack and switch to it, first
 // doing some setup required for memory allocator to work.
+// 引导处理器从这里开始执行 C 代码，先完成内存分配器所需的初始化，
+// 分配真正的内核栈并切换到该栈上。
 int
 // 中文说明：内核启动总入口，按顺序初始化 CPU、内存、中断、设备、文件系统和进程。
 main(void)
 {
-  kinit1(end, P2V(4*1024*1024)); // phys page allocator
-  kvmalloc();      // kernel page table
-  mpinit();        // detect other processors
-  lapicinit();     // interrupt controller
-  seginit();       // segment descriptors
-  picinit();       // disable pic
-  ioapicinit();    // another interrupt controller
-  consoleinit();   // console hardware
-  uartinit();      // serial port
-  pinit();         // process table
-  tvinit();        // trap vectors
-  binit();         // buffer cache
-  fileinit();      // file table
-  ideinit();       // disk 
-  startothers();   // start other processors
+  kinit1(end, P2V(4*1024*1024)); // phys page allocator；初始化物理页分配器
+  kvmalloc();      // kernel page table；建立内核页表
+  mpinit();        // detect other processors；检测其他处理器
+  lapicinit();     // interrupt controller；初始化局部 APIC
+  seginit();       // segment descriptors；初始化段描述符
+  picinit();       // disable pic；禁用旧式 PIC
+  ioapicinit();    // another interrupt controller；初始化 IOAPIC
+  consoleinit();   // console hardware；初始化控制台
+  uartinit();      // serial port；初始化串口
+  pinit();         // process table；初始化进程表
+  tvinit();        // trap vectors；初始化陷阱向量
+  binit();         // buffer cache；初始化块缓存
+  fileinit();      // file table；初始化文件表
+  ideinit();       // disk；初始化 IDE 磁盘
+  startothers();   // start other processors；启动其他处理器
   kinit2(P2V(4*1024*1024), P2V(PHYSTOP)); // must come after startothers()
-  userinit();      // first user process
-  mpmain();        // finish this processor's setup
+  userinit();      // first user process；创建第一个用户进程
+  mpmain();        // finish this processor's setup；完成当前处理器初始化
 }
 
 // Other CPUs jump here from entryother.S.

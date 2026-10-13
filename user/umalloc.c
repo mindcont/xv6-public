@@ -9,7 +9,9 @@
 #include "param.h"
 
 // Memory allocator by Kernighan and Ritchie,
+// 本内存分配器来自 Kernighan 和 Ritchie 的实现，
 // The C programming Language, 2nd ed.  Section 8.7.
+// 参考《C 程序设计语言》第 2 版第 8.7 节。
 
 typedef long Align;
 

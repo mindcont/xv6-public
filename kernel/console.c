@@ -4,8 +4,11 @@
 // 所属阶段：设备驱动阶段
 //
 // Console input and output.
+// 控制台输入输出。
 // Input is from the keyboard or serial port.
+// 输入来自键盘或串口。
 // Output is written to the screen and serial port.
+// 输出写入屏幕和串口。
 
 #include "types.h"
 #include "defs.h"
@@ -56,6 +59,7 @@ printint(int xx, int base, int sign)
 //PAGEBREAK: 50
 
 // Print to the console. only understands %d, %x, %p, %s.
+// 向控制台打印，只支持 %d、%x、%p 和 %s。
 void
 cprintf(char *fmt, ...)
 {
@@ -98,6 +102,7 @@ cprintf(char *fmt, ...)
       break;
     default:
       // Print unknown % sequence to draw attention.
+      // 打印未知的 % 格式，以便引起注意。
       consputc('%');
       consputc(c);
       break;
@@ -117,13 +122,14 @@ panic(char *s)
   cli();
   cons.locking = 0;
   // use lapiccpunum so that we can call panic from mycpu()
+  // 使用 lapiccpunum，这样即使 mycpu() 出错也可以调用 panic。
   cprintf("lapicid %d: panic: ", lapicid());
   cprintf(s);
   cprintf("\n");
   getcallerpcs(&s, pcs);
   for(i=0; i<10; i++)
     cprintf(" %p", pcs[i]);
-  panicked = 1; // freeze other CPU
+  panicked = 1; // freeze other CPU；冻结其他 CPU
   for(;;)
     ;
 }
@@ -139,6 +145,7 @@ cgaputc(int c)
   int pos;
 
   // Cursor position: col + 80*row.
+  // 光标位置为 col + 80*row。
   outb(CRTPORT, 14);
   pos = inb(CRTPORT+1) << 8;
   outb(CRTPORT, 15);
@@ -149,12 +156,12 @@ cgaputc(int c)
   else if(c == BACKSPACE){
     if(pos > 0) --pos;
   } else
-    crt[pos++] = (c&0xff) | 0x0700;  // black on white
+    crt[pos++] = (c&0xff) | 0x0700;  // black on white；黑字白底
 
   if(pos < 0 || pos > 25*80)
     panic("pos under/overflow");
 
-  if((pos/80) >= 24){  // Scroll up.
+  if((pos/80) >= 24){  // Scroll up；向上滚屏
     memmove(crt, crt+80, sizeof(crt[0])*23*80);
     pos -= 80;
     memset(crt+pos, 0, sizeof(crt[0])*(24*80 - pos));
@@ -186,12 +193,12 @@ consputc(int c)
 #define INPUT_BUF 128
 struct {
   char buf[INPUT_BUF];
-  uint r;  // Read index
-  uint w;  // Write index
-  uint e;  // Edit index
+  uint r;  // Read index；读取位置
+  uint w;  // Write index；写入位置
+  uint e;  // Edit index；编辑位置
 } input;
 
-#define C(x)  ((x)-'@')  // Control-x
+#define C(x)  ((x)-'@')  // Control-x；控制字符 x
 
 void
 consoleintr(int (*getc)(void))
@@ -201,18 +208,19 @@ consoleintr(int (*getc)(void))
   acquire(&cons.lock);
   while((c = getc()) >= 0){
     switch(c){
-    case C('P'):  // Process listing.
+    case C('P'):  // Process listing；显示进程列表
       // procdump() locks cons.lock indirectly; invoke later
+      // procdump() 间接需要 cons.lock，因此稍后调用。
       doprocdump = 1;
       break;
-    case C('U'):  // Kill line.
+    case C('U'):  // Kill line；删除当前行
       while(input.e != input.w &&
             input.buf[(input.e-1) % INPUT_BUF] != '\n'){
         input.e--;
         consputc(BACKSPACE);
       }
       break;
-    case C('H'): case '\x7f':  // Backspace
+    case C('H'): case '\x7f':  // Backspace；退格
       if(input.e != input.w){
         input.e--;
         consputc(BACKSPACE);
@@ -233,7 +241,7 @@ consoleintr(int (*getc)(void))
   }
   release(&cons.lock);
   if(doprocdump) {
-    procdump();  // now call procdump() wo. cons.lock held
+    procdump();  // now call procdump() wo. cons.lock held；此时已不持有 cons.lock
   }
 }
 
@@ -256,10 +264,11 @@ consoleread(struct inode *ip, char *dst, int n)
       sleep(&input.r, &cons.lock);
     }
     c = input.buf[input.r++ % INPUT_BUF];
-    if(c == C('D')){  // EOF
+    if(c == C('D')){  // EOF；输入结束
       if(n < target){
         // Save ^D for next time, to make sure
         // caller gets a 0-byte result.
+        // 保存 ^D 供下次读取，确保调用者得到 0 字节结果。
         input.r--;
       }
       break;

@@ -4,6 +4,7 @@
 // 所属阶段：内核实现阶段
 //
 // Routines to let C code use special x86 instructions.
+// 让 C 代码能够使用特殊 x86 指令的内联函数。
 
 static inline uchar
 inb(ushort port)
@@ -128,6 +129,7 @@ xchg(volatile uint *addr, uint newval)
   uint result;
 
   // The + in "+m" denotes a read-modify-write operand.
+  // “+m” 中的加号表示该操作数会被读取并修改后写回。
   asm volatile("lock; xchgl %0, %1" :
                "+m" (*addr), "=a" (result) :
                "1" (newval) :
@@ -151,19 +153,21 @@ lcr3(uint val)
 
 //PAGEBREAK: 36
 // Layout of the trap frame built on the stack by the
+// 由硬件和 trapasm.S 在栈上构造、并传递给
 // hardware and by trapasm.S, and passed to trap().
+// trap() 的陷阱帧布局。
 struct trapframe {
-  // registers as pushed by pusha
+  // registers as pushed by pusha；pusha 压入的寄存器
   uint edi;
   uint esi;
   uint ebp;
-  uint oesp;      // useless & ignored
+  uint oesp;      // useless & ignored；无用，忽略
   uint ebx;
   uint edx;
   uint ecx;
   uint eax;
 
-  // rest of trap frame
+  // rest of trap frame；陷阱帧的其余部分
   ushort gs;
   ushort padding1;
   ushort fs;
@@ -174,7 +178,7 @@ struct trapframe {
   ushort padding4;
   uint trapno;
 
-  // below here defined by x86 hardware
+  // below here defined by x86 hardware；以下字段由 x86 硬件定义
   uint err;
   uint eip;
   ushort cs;
@@ -182,6 +186,7 @@ struct trapframe {
   uint eflags;
 
   // below here only when crossing rings, such as from user to kernel
+  // 以下字段只在跨特权级时存在，例如从用户态进入内核态。
   uint esp;
   ushort ss;
   ushort padding6;

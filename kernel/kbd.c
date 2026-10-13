@@ -26,12 +26,13 @@ kbdgetc(void)
     shift |= E0ESC;
     return 0;
   } else if(data & 0x80){
-    // Key released
+    // Key released；按键释放
     data = (shift & E0ESC ? data : data & 0x7F);
     shift &= ~(shiftcode[data] | E0ESC);
     return 0;
   } else if(shift & E0ESC){
     // Last character was an E0 escape; or with 0x80
+    // 上一个扫描码是 E0 转义码，或带有 0x80 标志。
     data |= 0x80;
     shift &= ~E0ESC;
   }

@@ -3,13 +3,14 @@
 // 文件作用：实现 xv6 Shell，解析命令并执行重定向、管道和后台任务
 // 所属阶段：用户程序与系统调用阶段
 //
-// Shell.
+// Shell. xv6 用户态命令解释器。
 
 #include "types.h"
 #include "user.h"
 #include "fcntl.h"
 
 // Parsed command representation
+// 解析后的命令树表示。
 #define EXEC  1
 #define REDIR 2
 #define PIPE  3
@@ -54,11 +55,12 @@ struct backcmd {
   struct cmd *cmd;
 };
 
-int fork1(void);  // Fork but panics on failure.
+int fork1(void);  // Fork but panics on failure；创建子进程，失败时触发 panic。
 void panic(char*);
 struct cmd *parsecmd(char*);
 
 // Execute cmd.  Never returns.
+// 执行命令树；该函数不会返回。
 void
 // 中文说明：递归执行命令树，处理简单命令、重定向、管道和后台命令。
 runcmd(struct cmd *cmd)
@@ -142,7 +144,7 @@ getcmd(char *buf, int nbuf)
   printf(2, "$ ");
   memset(buf, 0, nbuf);
   gets(buf, nbuf);
-  if(buf[0] == 0) // EOF
+  if(buf[0] == 0) // EOF；输入结束
     return -1;
   return 0;
 }
@@ -155,6 +157,7 @@ main(void)
   int fd;
 
   // Ensure that three file descriptors are open.
+  // 确保标准输入、标准输出和标准错误三个文件描述符已经打开。
   while((fd = open("console", O_RDWR)) >= 0){
     if(fd >= 3){
       close(fd);
@@ -163,10 +166,12 @@ main(void)
   }
 
   // Read and run input commands.
+  // 读取并执行用户输入的命令。
   while(getcmd(buf, sizeof(buf)) >= 0){
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
       // Chdir must be called by the parent, not the child.
-      buf[strlen(buf)-1] = 0;  // chop \n
+      // chdir 必须由父进程调用，而不是由子进程调用。
+      buf[strlen(buf)-1] = 0;  // chop \n；去掉换行符
       if(chdir(buf+3) < 0)
         printf(2, "cannot cd %s\n", buf+3);
       continue;
@@ -198,6 +203,7 @@ fork1(void)
 
 //PAGEBREAK!
 // Constructors
+// 命令节点构造函数。
 
 struct cmd*
 execcmd(void)
@@ -265,6 +271,7 @@ backcmd(struct cmd *subcmd)
 }
 //PAGEBREAK!
 // Parsing
+// 命令解析函数。
 
 char whitespace[] = " \t\r\n\v";
 char symbols[] = "<|>&;()";
@@ -396,7 +403,7 @@ parseredirs(struct cmd *cmd, char **ps, char *es)
     case '>':
       cmd = redircmd(cmd, q, eq, O_WRONLY|O_CREATE, 1);
       break;
-    case '+':  // >>
+    case '+':  // >>；追加重定向
       cmd = redircmd(cmd, q, eq, O_WRONLY|O_CREATE, 1);
       break;
     }
@@ -454,6 +461,7 @@ parseexec(char **ps, char *es)
 }
 
 // NUL-terminate all the counted strings.
+// 为所有按长度记录的字符串补上 NUL 结束符。
 struct cmd*
 nulterminate(struct cmd *cmd)
 {

@@ -12,20 +12,26 @@
 #include "proc.h"
 #include "elf.h"
 
-extern char data[];  // defined by kernel.ld
-pde_t *kpgdir;  // for use in scheduler()
+extern char data[];  // defined by kernel.ld；由 kernel.ld 定义
+pde_t *kpgdir;  // for use in scheduler()；供 scheduler() 使用
 
 // Set up CPU's kernel segment descriptors.
 // Run once on entry on each CPU.
+// 设置 CPU 的内核段描述符；每个 CPU 进入内核时执行一次。
+// 设置 CPU 的内核段描述符；每个 CPU 启动时执行一次。
 void
 seginit(void)
 {
   struct cpu *c;
 
   // Map "logical" addresses to virtual addresses using identity map.
+  // 使用恒等映射把“逻辑”地址映射为虚拟地址。
   // Cannot share a CODE descriptor for both kernel and user
+  // 内核和用户不能共用同一个 CODE 段描述符，
   // because it would have to have DPL_USR, but the CPU forbids
+  // 因为它必须设置为 DPL_USR，而 CPU 禁止
   // an interrupt from CPL=0 to DPL=3.
+  // 从 CPL=0 到 DPL=3 的这种中断切换。
   c = &cpus[cpuid()];
   c->gdt[SEG_KCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, 0);
   c->gdt[SEG_KDATA] = SEG(STA_W, 0, 0xffffffff, 0);
@@ -35,8 +41,14 @@ seginit(void)
 }
 
 // Return the address of the PTE in page table pgdir
+// 返回页表 pgdir 中对应 PTE 的地址，
+// 返回页表 pgdir 中对应 PTE 的地址，
 // that corresponds to virtual address va.  If alloc!=0,
+// 对应虚拟地址 va；如果 alloc 不为 0，
+// 它对应虚拟地址 va；如果 alloc 不为 0，
 // create any required page table pages.
+// 则创建所需的页表页面。
+// 则创建所需的页表页面。
 static pte_t *
 walkpgdir(pde_t *pgdir, const void *va, int alloc)
 {
@@ -50,18 +62,28 @@ walkpgdir(pde_t *pgdir, const void *va, int alloc)
     if(!alloc || (pgtab = (pte_t*)kalloc()) == 0)
       return 0;
     // Make sure all those PTE_P bits are zero.
+    // 确保这些页表项的 PTE_P 位全部为 0。
     memset(pgtab, 0, PGSIZE);
     // The permissions here are overly generous, but they can
+    // 这里的权限设置比较宽松，但之后可以
     // be further restricted by the permissions in the page table
+    // 通过页表项中的权限
     // entries, if necessary.
+    // 进一步限制它们。
     *pde = V2P(pgtab) | PTE_P | PTE_W | PTE_U;
   }
   return &pgtab[PTX(va)];
 }
 
 // Create PTEs for virtual addresses starting at va that refer to
+// 为从 va 开始的虚拟地址创建 PTE，使其指向
+// 为从 va 开始的虚拟地址创建页表项，使其指向
 // physical addresses starting at pa. va and size might not
+// 从 pa 开始的物理地址；va 和 size 不一定
+// 从 pa 开始的物理地址；va 和 size 不一定
 // be page-aligned.
+// 按页面对齐。
+// 按页面对齐。
 static int
 mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
 {
@@ -85,21 +107,41 @@ mappages(pde_t *pgdir, void *va, uint size, uint pa, int perm)
 }
 
 // There is one page table per process, plus one that's used when
+// 每个进程有一套页表，另外还有一套在 CPU
+// 每个进程有一套页表，另外还有一套供 CPU
 // a CPU is not running any process (kpgdir). The kernel uses the
+// 没有运行进程时使用（kpgdir）。内核使用
+// 未运行进程时使用（kpgdir）。内核在系统调用和中断期间使用
 // current process's page table during system calls and interrupts;
+// 当前进程的页表处理系统调用和中断；
+// 当前进程的页表；
 // page protection bits prevent user code from using the kernel's
+// 页保护位阻止用户代码访问内核的
+// 页保护位阻止用户代码访问内核的
 // mappings.
+// 映射。
+// 映射。
 //
 // setupkvm() and exec() set up every page table like this:
+// setupkvm() 和 exec() 按如下方式建立每套页表：
+// setupkvm() 和 exec() 按如下方式建立每套页表：
 //
 //   0..KERNBASE: user memory (text+data+stack+heap), mapped to
+//   0..KERNBASE：用户内存（代码、数据、栈和堆），映射到
 //                phys memory allocated by the kernel
+//                内核分配的物理内存。
 //   KERNBASE..KERNBASE+EXTMEM: mapped to 0..EXTMEM (for I/O space)
+//   KERNBASE..KERNBASE+EXTMEM：映射到 0..EXTMEM（I/O 空间）。
 //   KERNBASE+EXTMEM..data: mapped to EXTMEM..V2P(data)
+//   KERNBASE+EXTMEM..data：映射到 EXTMEM..V2P(data)，
 //                for the kernel's instructions and r/o data
+//                用于内核指令和只读数据。
 //   data..KERNBASE+PHYSTOP: mapped to V2P(data)..PHYSTOP,
+//   data..KERNBASE+PHYSTOP：映射到 V2P(data)..PHYSTOP，
 //                                  rw data + free physical memory
+//                                  用于可读写数据和空闲物理内存。
 //   0xfe000000..0: mapped direct (devices such as ioapic)
+//   0xfe000000..0：直接映射设备地址（例如 IOAPIC）。
 //
 // The kernel allocates physical memory for its heap and for user memory
 // between V2P(end) and the end of physical memory (PHYSTOP)
@@ -120,6 +162,8 @@ static struct kmap {
 };
 
 // Set up kernel part of a page table.
+// 建立页表中的内核部分。
+// 建立页表中的内核部分。
 pde_t*
 // 中文说明：创建并填充一个进程使用的内核地址空间页表。
 setupkvm(void)
@@ -142,7 +186,9 @@ setupkvm(void)
 }
 
 // Allocate one page table for the machine for the kernel address
+// 为机器分配一套内核地址空间页表，供
 // space for scheduler processes.
+// 调度器在没有当前进程时使用。
 void
 // 中文说明：建立全局内核页表并切换当前 CPU 使用它。
 kvmalloc(void)
@@ -152,14 +198,17 @@ kvmalloc(void)
 }
 
 // Switch h/w page table register to the kernel-only page table,
+// 将硬件页表寄存器切换到只包含内核映射的页表，
 // for when no process is running.
+// 供当前没有运行进程时使用。
 void
 switchkvm(void)
 {
-  lcr3(V2P(kpgdir));   // switch to the kernel page table
+  lcr3(V2P(kpgdir));   // switch to the kernel page table；切换到内核页表
 }
 
 // Switch TSS and h/w page table to correspond to process p.
+// 切换 TSS 和硬件页表，使其对应进程 p。
 void
 // 中文说明：切换到指定进程的用户页表和内核栈。
 switchuvm(struct proc *p)
@@ -178,15 +227,19 @@ switchuvm(struct proc *p)
   mycpu()->ts.ss0 = SEG_KDATA << 3;
   mycpu()->ts.esp0 = (uint)p->kstack + KSTACKSIZE;
   // setting IOPL=0 in eflags *and* iomb beyond the tss segment limit
+  // 将 eflags 中的 IOPL 设置为 0，并把 iomb 放到 TSS 段界限之外，
   // forbids I/O instructions (e.g., inb and outb) from user space
+  // 这样可以禁止用户态执行 I/O 指令（例如 inb 和 outb）。
   mycpu()->ts.iomb = (ushort) 0xFFFF;
   ltr(SEG_TSS << 3);
-  lcr3(V2P(p->pgdir));  // switch to process's address space
+  lcr3(V2P(p->pgdir));  // switch to process's address space；切换到进程地址空间
   popcli();
 }
 
 // Load the initcode into address 0 of pgdir.
+// 把 initcode 加载到 pgdir 的地址 0 处。
 // sz must be less than a page.
+// sz 必须小于一个页面大小。
 void
 inituvm(pde_t *pgdir, char *init, uint sz)
 {
@@ -201,7 +254,11 @@ inituvm(pde_t *pgdir, char *init, uint sz)
 }
 
 // Load a program segment into pgdir.  addr must be page-aligned
+// 将程序段加载到 pgdir；addr 必须按页面对齐，
+// 把程序段加载到 pgdir；addr 必须按页面对齐，
 // and the pages from addr to addr+sz must already be mapped.
+// addr 到 addr+sz 的页面必须已经建立映射。
+// addr 到 addr+sz 的页面必须已经建立映射。
 int
 loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
 {
@@ -225,7 +282,11 @@ loaduvm(pde_t *pgdir, char *addr, struct inode *ip, uint offset, uint sz)
 }
 
 // Allocate page tables and physical memory to grow process from oldsz to
+// 分配页表和物理内存，把进程从 oldsz 扩展到
+// 分配页表和物理内存，把进程从 oldsz 扩展到
 // newsz, which need not be page aligned.  Returns new size or 0 on error.
+// newsz；大小不必按页面对齐，出错时返回 0，否则返回新大小。
+// newsz；两者不必按页面对齐，出错时返回 0，否则返回新大小。
 int
 allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
@@ -257,9 +318,14 @@ allocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 }
 
 // Deallocate user pages to bring the process size from oldsz to
+// 释放用户页面，把进程大小从 oldsz 缩小到
+// 释放用户页面，把进程大小从 oldsz 缩小到
 // newsz.  oldsz and newsz need not be page-aligned, nor does newsz
+// newsz；oldsz 和 newsz 不必按页面对齐，且 newsz
 // need to be less than oldsz.  oldsz can be larger than the actual
+// 不一定小于 oldsz，oldsz 也可以大于实际的
 // process size.  Returns the new process size.
+// 进程大小；返回新的进程大小。
 int
 deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 {
@@ -287,6 +353,7 @@ deallocuvm(pde_t *pgdir, uint oldsz, uint newsz)
 }
 
 // Free a page table and all the physical memory pages
+// 释放页表以及用户部分的所有物理内存页面。
 // in the user part.
 void
 freevm(pde_t *pgdir)
@@ -306,7 +373,9 @@ freevm(pde_t *pgdir)
 }
 
 // Clear PTE_U on a page. Used to create an inaccessible
+// 清除页面上的 PTE_U 位，用于创建用户不可访问的
 // page beneath the user stack.
+// 用户栈下方的保护页面。
 void
 clearpteu(pde_t *pgdir, char *uva)
 {
@@ -319,7 +388,9 @@ clearpteu(pde_t *pgdir, char *uva)
 }
 
 // Given a parent process's page table, create a copy
+// 根据父进程页表创建一份副本，
 // of it for a child.
+// 作为子进程的页表。
 pde_t*
 // 中文说明：复制父进程的用户地址空间，用于传统 fork。
 copyuvm(pde_t *pgdir, uint sz)
@@ -355,6 +426,7 @@ bad:
 
 //PAGEBREAK!
 // Map user virtual address to kernel address.
+// 将用户虚拟地址映射为内核地址。
 char*
 uva2ka(pde_t *pgdir, char *uva)
 {
@@ -369,8 +441,11 @@ uva2ka(pde_t *pgdir, char *uva)
 }
 
 // Copy len bytes from p to user address va in page table pgdir.
+// 根据页表 pgdir，把 p 中的 len 字节复制到用户地址 va。
 // Most useful when pgdir is not the current page table.
+// 当 pgdir 不是当前页表时尤其有用。
 // uva2ka ensures this only works for PTE_U pages.
+// uva2ka 确保该操作只作用于带有 PTE_U 的页面。
 int
 copyout(pde_t *pgdir, uint va, void *p, uint len)
 {

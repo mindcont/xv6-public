@@ -4,7 +4,9 @@
 // 所属阶段：内核实现阶段
 //
 // The local APIC manages internal (non-I/O) interrupts.
+// Local APIC 管理 CPU 内部的非 I/O 中断。
 // See Chapter 8 & Appendix C of Intel processor manual volume 3.
+// 具体可参考 Intel 处理器手册第 3 卷第 8 章和附录 C。
 
 #include "param.h"
 #include "types.h"
@@ -16,44 +18,45 @@
 #include "x86.h"
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
-#define ID      (0x0020/4)   // ID
-#define VER     (0x0030/4)   // Version
-#define TPR     (0x0080/4)   // Task Priority
-#define EOI     (0x00B0/4)   // EOI
-#define SVR     (0x00F0/4)   // Spurious Interrupt Vector
-  #define ENABLE     0x00000100   // Unit Enable
-#define ESR     (0x0280/4)   // Error Status
-#define ICRLO   (0x0300/4)   // Interrupt Command
-  #define INIT       0x00000500   // INIT/RESET
-  #define STARTUP    0x00000600   // Startup IPI
-  #define DELIVS     0x00001000   // Delivery status
-  #define ASSERT     0x00004000   // Assert interrupt (vs deassert)
+// Local APIC 寄存器地址除以 4，作为 uint[] 的索引。
+#define ID      (0x0020/4)   // ID；标识符
+#define VER     (0x0030/4)   // Version；版本
+#define TPR     (0x0080/4)   // Task Priority；任务优先级
+#define EOI     (0x00B0/4)   // EOI；中断结束
+#define SVR     (0x00F0/4)   // Spurious Interrupt Vector；伪中断向量
+  #define ENABLE     0x00000100   // Unit Enable；启用单元
+#define ESR     (0x0280/4)   // Error Status；错误状态
+#define ICRLO   (0x0300/4)   // Interrupt Command；中断命令
+  #define INIT       0x00000500   // INIT/RESET；初始化/复位
+  #define STARTUP    0x00000600   // Startup IPI；启动处理器间中断
+  #define DELIVS     0x00001000   // Delivery status；发送状态
+  #define ASSERT     0x00004000   // Assert interrupt (vs deassert)；发送中断，而非撤销
   #define DEASSERT   0x00000000
-  #define LEVEL      0x00008000   // Level triggered
-  #define BCAST      0x00080000   // Send to all APICs, including self.
+  #define LEVEL      0x00008000   // Level triggered；电平触发
+  #define BCAST      0x00080000   // Send to all APICs, including self；发送给所有 APIC，包括自身
   #define BUSY       0x00001000
   #define FIXED      0x00000000
-#define ICRHI   (0x0310/4)   // Interrupt Command [63:32]
-#define TIMER   (0x0320/4)   // Local Vector Table 0 (TIMER)
-  #define X1         0x0000000B   // divide counts by 1
-  #define PERIODIC   0x00020000   // Periodic
-#define PCINT   (0x0340/4)   // Performance Counter LVT
-#define LINT0   (0x0350/4)   // Local Vector Table 1 (LINT0)
-#define LINT1   (0x0360/4)   // Local Vector Table 2 (LINT1)
-#define ERROR   (0x0370/4)   // Local Vector Table 3 (ERROR)
-  #define MASKED     0x00010000   // Interrupt masked
-#define TICR    (0x0380/4)   // Timer Initial Count
-#define TCCR    (0x0390/4)   // Timer Current Count
-#define TDCR    (0x03E0/4)   // Timer Divide Configuration
+#define ICRHI   (0x0310/4)   // Interrupt Command [63:32]；中断命令高 32 位
+#define TIMER   (0x0320/4)   // Local Vector Table 0 (TIMER)；本地向量表 0（定时器）
+  #define X1         0x0000000B   // divide counts by 1；计数除以 1
+  #define PERIODIC   0x00020000   // Periodic；周期模式
+#define PCINT   (0x0340/4)   // Performance Counter LVT；性能计数器本地向量表项
+#define LINT0   (0x0350/4)   // Local Vector Table 1 (LINT0)；本地向量表 1
+#define LINT1   (0x0360/4)   // Local Vector Table 2 (LINT1)；本地向量表 2
+#define ERROR   (0x0370/4)   // Local Vector Table 3 (ERROR)；本地向量表 3
+  #define MASKED     0x00010000   // Interrupt masked；屏蔽中断
+#define TICR    (0x0380/4)   // Timer Initial Count；定时器初始计数
+#define TCCR    (0x0390/4)   // Timer Current Count；定时器当前计数
+#define TDCR    (0x03E0/4)   // Timer Divide Configuration；定时器分频配置
 
-volatile uint *lapic;  // Initialized in mp.c
+volatile uint *lapic;  // Initialized in mp.c；由 mp.c 初始化
 
 //PAGEBREAK!
 static void
 lapicw(int index, int value)
 {
   lapic[index] = value;
-  lapic[ID];  // wait for write to finish, by reading
+  lapic[ID];  // wait for write to finish, by reading；通过读取等待写入完成
 }
 
 void
@@ -63,33 +66,41 @@ lapicinit(void)
     return;
 
   // Enable local APIC; set spurious interrupt vector.
+  // 启用 Local APIC，并设置伪中断向量。
   lapicw(SVR, ENABLE | (T_IRQ0 + IRQ_SPURIOUS));
 
   // The timer repeatedly counts down at bus frequency
+  // 定时器以总线频率反复倒计时，
   // from lapic[TICR] and then issues an interrupt.
+  // 从 lapic[TICR] 开始计数，到 0 后产生中断。
   // If xv6 cared more about precise timekeeping,
+  // 如果 xv6 需要更精确的计时，
   // TICR would be calibrated using an external time source.
+  // 就应使用外部时钟源校准 TICR。
   lapicw(TDCR, X1);
   lapicw(TIMER, PERIODIC | (T_IRQ0 + IRQ_TIMER));
   lapicw(TICR, 10000000);
 
-  // Disable logical interrupt lines.
+  // Disable logical interrupt lines. 禁用逻辑中断线。
   lapicw(LINT0, MASKED);
   lapicw(LINT1, MASKED);
 
   // Disable performance counter overflow interrupts
+  // 禁用性能计数器溢出中断，
   // on machines that provide that interrupt entry.
+  // 适用于提供该中断入口的机器。
   if(((lapic[VER]>>16) & 0xFF) >= 4)
     lapicw(PCINT, MASKED);
 
-  // Map error interrupt to IRQ_ERROR.
+  // Map error interrupt to IRQ_ERROR. 将错误中断映射到 IRQ_ERROR。
   lapicw(ERROR, T_IRQ0 + IRQ_ERROR);
 
   // Clear error status register (requires back-to-back writes).
+  // 清除错误状态寄存器（需要连续写入）。
   lapicw(ESR, 0);
   lapicw(ESR, 0);
 
-  // Ack any outstanding interrupts.
+  // Ack any outstanding interrupts. 确认所有待处理的中断。
   lapicw(EOI, 0);
 
   // Send an Init Level De-Assert to synchronise arbitration ID's.
@@ -99,6 +110,7 @@ lapicinit(void)
     ;
 
   // Enable interrupts on the APIC (but not on the processor).
+  // 在 APIC 上启用中断，但不启用处理器本身的中断。
   lapicw(TPR, 0);
 }
 
@@ -111,6 +123,7 @@ lapicid(void)
 }
 
 // Acknowledge interrupt.
+// 确认中断。
 void
 lapiceoi(void)
 {
@@ -119,7 +132,9 @@ lapiceoi(void)
 }
 
 // Spin for a given number of microseconds.
+// 自旋等待指定的微秒数。
 // On real hardware would want to tune this dynamically.
+// 在真实硬件上通常需要动态调整该延时。
 void
 microdelay(int us)
 {
@@ -129,7 +144,9 @@ microdelay(int us)
 #define CMOS_RETURN  0x71
 
 // Start additional processor running entry code at addr.
+// 启动额外处理器，让它从 addr 处的入口代码开始运行。
 // See Appendix B of MultiProcessor Specification.
+// 参考《多处理器规范》附录 B。
 void
 lapicstartap(uchar apicid, uint addr)
 {
@@ -145,8 +162,9 @@ lapicstartap(uchar apicid, uint addr)
   wrv[0] = 0;
   wrv[1] = addr >> 4;
 
-  // "Universal startup algorithm."
+  // "Universal startup algorithm." 通用启动算法。
   // Send INIT (level-triggered) interrupt to reset other CPU.
+  // 发送 INIT（电平触发）中断以复位其他 CPU。
   lapicw(ICRHI, apicid<<24);
   lapicw(ICRLO, INIT | LEVEL | ASSERT);
   microdelay(200);
@@ -154,10 +172,13 @@ lapicstartap(uchar apicid, uint addr)
   microdelay(100);    // should be 10ms, but too slow in Bochs!
 
   // Send startup IPI (twice!) to enter code.
+  // 发送两次启动 IPI，让其他 CPU 进入入口代码。
   // Regular hardware is supposed to only accept a STARTUP
   // when it is in the halted state due to an INIT.  So the second
   // should be ignored, but it is part of the official Intel algorithm.
+  // 第二次理论上应被忽略，但它是 Intel 官方算法的一部分。
   // Bochs complains about the second one.  Too bad for Bochs.
+  // Bochs 会对第二次发送发出警告，但这属于模拟器限制。
   for(i = 0; i < 2; i++){
     lapicw(ICRHI, apicid<<24);
     lapicw(ICRLO, STARTUP | (addr>>12));
@@ -167,7 +188,7 @@ lapicstartap(uchar apicid, uint addr)
 
 #define CMOS_STATA   0x0a
 #define CMOS_STATB   0x0b
-#define CMOS_UIP    (1 << 7)        // RTC update in progress
+#define CMOS_UIP    (1 << 7)        // RTC update in progress；RTC 正在更新
 
 #define SECS    0x00
 #define MINS    0x02
@@ -197,6 +218,7 @@ fill_rtcdate(struct rtcdate *r)
 }
 
 // qemu seems to use 24-hour GWT and the values are BCD encoded
+// QEMU 似乎使用 24 小时制，时间值采用 BCD 编码。
 void
 cmostime(struct rtcdate *r)
 {
@@ -208,6 +230,7 @@ cmostime(struct rtcdate *r)
   bcd = (sb & (1 << 2)) == 0;
 
   // make sure CMOS doesn't modify time while we read it
+  // 确保读取期间 CMOS 不修改时间。
   for(;;) {
     fill_rtcdate(&t1);
     if(cmos_read(CMOS_STATA) & CMOS_UIP)
@@ -217,7 +240,7 @@ cmostime(struct rtcdate *r)
       break;
   }
 
-  // convert
+  // convert；转换时间值
   if(bcd) {
 #define    CONV(x)     (t1.x = ((t1.x >> 4) * 10) + (t1.x & 0xf))
     CONV(second);

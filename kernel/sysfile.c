@@ -5,8 +5,11 @@
 //
 //
 // File-system system calls.
+// 文件系统相关系统调用。
 // Mostly argument checking, since we don't trust
+// 主要负责参数检查，因为不能信任
 // user code, and calls into file.c and fs.c.
+// 用户代码，然后调用 file.c 和 fs.c 中的实现。
 //
 
 #include "types.h"
@@ -22,7 +25,9 @@
 #include "fcntl.h"
 
 // Fetch the nth word-sized system call argument as a file descriptor
+// 获取第 n 个字长系统调用参数作为文件描述符，
 // and return both the descriptor and the corresponding struct file.
+// 同时返回文件描述符及对应的 struct file。
 static int
 argfd(int n, int *pfd, struct file **pf)
 {
@@ -41,7 +46,9 @@ argfd(int n, int *pfd, struct file **pf)
 }
 
 // Allocate a file descriptor for the given file.
+// 为指定文件分配一个文件描述符。
 // Takes over file reference from caller on success.
+// 成功时接管调用者持有的文件引用。
 static int
 fdalloc(struct file *f)
 {
@@ -120,6 +127,7 @@ sys_fstat(void)
 }
 
 // Create the path new as a link to the same inode as old.
+// 创建路径 new，使其链接到 old 所指向的同一个 inode。
 int
 sys_link(void)
 {
@@ -170,6 +178,7 @@ bad:
 }
 
 // Is the directory dp empty except for "." and ".." ?
+// 目录 dp 除了 “.” 和 “..” 之外是否为空？
 static int
 isdirempty(struct inode *dp)
 {
@@ -206,6 +215,7 @@ sys_unlink(void)
   ilock(dp);
 
   // Cannot unlink "." or "..".
+  // 不能删除 “.” 或 “..”。
   if(namecmp(name, ".") == 0 || namecmp(name, "..") == 0)
     goto bad;
 
@@ -271,10 +281,11 @@ create(char *path, short type, short major, short minor)
   ip->nlink = 1;
   iupdate(ip);
 
-  if(type == T_DIR){  // Create . and .. entries.
-    dp->nlink++;  // for ".."
+  if(type == T_DIR){  // Create . and .. entries；创建 “.” 和 “..” 目录项
+    dp->nlink++;  // for ".."；为 “..” 增加链接计数
     iupdate(dp);
     // No ip->nlink++ for ".": avoid cyclic ref count.
+    // 不为 “.” 增加 ip->nlink，避免形成循环引用计数。
     if(dirlink(ip, ".", ip->inum) < 0 || dirlink(ip, "..", dp->inum) < 0)
       panic("create dots");
   }

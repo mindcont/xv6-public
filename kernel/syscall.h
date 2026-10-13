@@ -4,6 +4,7 @@
 // 所属阶段：内核实现阶段
 //
 // System call numbers
+// 系统调用号定义。
 #define SYS_fork    1
 #define SYS_exit    2
 #define SYS_wait    3

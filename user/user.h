@@ -7,6 +7,7 @@ struct stat;
 struct rtcdate;
 
 // system calls
+// 系统调用声明。
 int fork(void);
 int exit(void) __attribute__((noreturn));
 int wait(void);
@@ -30,6 +31,7 @@ int sleep(int);
 int uptime(void);
 
 // ulib.c
+// ulib.c 中的用户库函数声明。
 int stat(const char*, struct stat*);
 char* strcpy(char*, const char*);
 void *memmove(void*, const void*, int);

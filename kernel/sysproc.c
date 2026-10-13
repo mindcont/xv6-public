@@ -23,7 +23,7 @@ int
 sys_exit(void)
 {
   exit();
-  return 0;  // not reached
+  return 0;  // not reached；不会执行到这里
 }
 
 int
@@ -84,7 +84,9 @@ sys_sleep(void)
 }
 
 // return how many clock tick interrupts have occurred
+// 返回自系统启动以来发生的时钟滴答中断次数，
 // since start.
+// 即系统运行时间。
 int
 sys_uptime(void)
 {

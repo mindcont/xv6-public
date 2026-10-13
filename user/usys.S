@@ -6,6 +6,9 @@
 #include "syscall.h"
 #include "traps.h"
 
+// 每个宏实例生成一个用户态系统调用存根：把系统调用号放入 eax，
+// 通过 int 指令进入内核，返回时继续执行用户程序。
+
 #define SYSCALL(name) \
   .globl name; \
   name: \

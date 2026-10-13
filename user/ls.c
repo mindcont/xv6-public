@@ -15,11 +15,13 @@ fmtname(char *path)
   char *p;
 
   // Find first character after last slash.
+  // 查找最后一个斜杠后的第一个字符。
   for(p=path+strlen(path); p >= path && *p != '/'; p--)
     ;
   p++;
 
   // Return blank-padded name.
+  // 返回用空格填充到固定长度的名称。
   if(strlen(p) >= DIRSIZ)
     return p;
   memmove(buf, p, strlen(p));

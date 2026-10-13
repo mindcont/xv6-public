@@ -4,6 +4,7 @@
 // 所属阶段：用户程序阶段
 //
 // Simple grep.  Only supports ^ . * $ operators.
+// 简单的 grep，只支持 ^、.、*、$ 运算符。
 
 #include "types.h"
 #include "stat.h"
@@ -69,7 +70,9 @@ main(int argc, char *argv[])
 }
 
 // Regexp matcher from Kernighan & Pike,
+// 正则表达式匹配器来自 Kernighan 和 Pike 的
 // The Practice of Programming, Chapter 9.
+// 《程序设计实践》第 9 章。
 
 int matchhere(char*, char*);
 int matchstar(int, char*, char*);
@@ -79,7 +82,7 @@ match(char *re, char *text)
 {
   if(re[0] == '^')
     return matchhere(re+1, text);
-  do{  // must look at empty string
+  do{  // must look at empty string；必须检查空字符串
     if(matchhere(re, text))
       return 1;
   }while(*text++ != '\0');
@@ -87,6 +90,7 @@ match(char *re, char *text)
 }
 
 // matchhere: search for re at beginning of text
+// matchhere：在文本开头匹配正则表达式 re。
 int matchhere(char *re, char *text)
 {
   if(re[0] == '\0')
@@ -101,9 +105,10 @@ int matchhere(char *re, char *text)
 }
 
 // matchstar: search for c*re at beginning of text
+// matchstar：在文本开头匹配 c*re。
 int matchstar(int c, char *re, char *text)
 {
-  do{  // a * matches zero or more instances
+  do{  // a * matches zero or more instances；* 匹配零个或多个实例
     if(matchhere(re, text))
       return 1;
   }while(*text!='\0' && (*text++==c || c=='.'));

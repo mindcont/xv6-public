@@ -5,6 +5,7 @@
 //
 //
 // File descriptors
+// 文件描述符及其对应的内核文件对象。
 //
 
 #include "types.h"
@@ -28,6 +29,7 @@ fileinit(void)
 }
 
 // Allocate a file structure.
+// 分配一个文件对象。
 struct file*
 // 中文说明：从全局文件表中分配一个新的文件对象。
 filealloc(void)
@@ -47,6 +49,7 @@ filealloc(void)
 }
 
 // Increment ref count for file f.
+// 增加文件 f 的引用计数。
 struct file*
 filedup(struct file *f)
 {
@@ -59,6 +62,7 @@ filedup(struct file *f)
 }
 
 // Close file f.  (Decrement ref count, close when reaches 0.)
+// 关闭文件 f；减少引用计数，降为 0 时真正关闭。
 void
 fileclose(struct file *f)
 {
@@ -86,6 +90,7 @@ fileclose(struct file *f)
 }
 
 // Get metadata about file f.
+// 获取文件 f 的元数据。
 int
 filestat(struct file *f, struct stat *st)
 {
@@ -99,6 +104,7 @@ filestat(struct file *f, struct stat *st)
 }
 
 // Read from file f.
+// 从文件 f 读取数据。
 int
 // 中文说明：根据文件对象类型读取 inode、设备或管道中的数据。
 fileread(struct file *f, char *addr, int n)
@@ -121,6 +127,7 @@ fileread(struct file *f, char *addr, int n)
 
 //PAGEBREAK!
 // Write to file f.
+// 向文件 f 写入数据。
 int
 // 中文说明：根据文件对象类型写入 inode、设备或管道。
 filewrite(struct file *f, char *addr, int n)
@@ -133,11 +140,17 @@ filewrite(struct file *f, char *addr, int n)
     return pipewrite(f->pipe, addr, n);
   if(f->type == FD_INODE){
     // write a few blocks at a time to avoid exceeding
+    // 每次只写入少量块，避免超过
     // the maximum log transaction size, including
+    // 日志事务的最大大小，其中包括
     // i-node, indirect block, allocation blocks,
+    // inode、间接块、分配块，
     // and 2 blocks of slop for non-aligned writes.
+    // 以及非对齐写入额外预留的 2 个块。
     // this really belongs lower down, since writei()
+    // 这段限制严格来说应放在更底层，因为 writei()
     // might be writing a device like the console.
+    // 也可能正在向控制台这样的设备写入。
     int max = ((MAXOPBLOCKS-1-1-2) / 2) * 512;
     int i = 0;
     while(i < n){

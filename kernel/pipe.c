@@ -18,10 +18,10 @@
 struct pipe {
   struct spinlock lock;
   char data[PIPESIZE];
-  uint nread;     // number of bytes read
-  uint nwrite;    // number of bytes written
-  int readopen;   // read fd is still open
-  int writeopen;  // write fd is still open
+  uint nread;     // number of bytes read；已读取的字节数
+  uint nwrite;    // number of bytes written；已写入的字节数
+  int readopen;   // read fd is still open；读端文件描述符是否仍打开
+  int writeopen;  // write fd is still open；写端文件描述符是否仍打开
 };
 
 int

@@ -4,6 +4,7 @@
 // 所属阶段：并发与锁阶段
 //
 // Sleeping locks
+// 睡眠锁：获取不到锁时允许当前进程睡眠。
 
 #include "types.h"
 #include "defs.h"

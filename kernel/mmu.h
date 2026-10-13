@@ -5,29 +5,32 @@
 //
 // This file contains definitions for the
 // x86 memory management unit (MMU).
+// 本文件定义 x86 内存管理单元（MMU）相关结构和常量。
 
-// Eflags register
-#define FL_IF           0x00000200      // Interrupt Enable
+// Eflags register；EFLAGS 标志寄存器
+#define FL_IF           0x00000200      // Interrupt Enable；中断允许
 
-// Control Register flags
-#define CR0_PE          0x00000001      // Protection Enable
-#define CR0_WP          0x00010000      // Write Protect
-#define CR0_PG          0x80000000      // Paging
+// Control Register flags；控制寄存器标志位
+#define CR0_PE          0x00000001      // Protection Enable；保护模式启用
+#define CR0_WP          0x00010000      // Write Protect；写保护
+#define CR0_PG          0x80000000      // Paging；分页启用
 
-#define CR4_PSE         0x00000010      // Page size extension
+#define CR4_PSE         0x00000010      // Page size extension；页面大小扩展
 
 // various segment selectors.
-#define SEG_KCODE 1  // kernel code
-#define SEG_KDATA 2  // kernel data+stack
-#define SEG_UCODE 3  // user code
-#define SEG_UDATA 4  // user data+stack
-#define SEG_TSS   5  // this process's task state
+// 各种段选择子。
+#define SEG_KCODE 1  // kernel code；内核代码
+#define SEG_KDATA 2  // kernel data+stack；内核数据和栈
+#define SEG_UCODE 3  // user code；用户代码
+#define SEG_UDATA 4  // user data+stack；用户数据和栈
+#define SEG_TSS   5  // this process's task state；当前进程的任务状态
 
 // cpu->gdt[NSEGS] holds the above segments.
+// cpu->gdt[NSEGS] 保存上述段描述符。
 #define NSEGS     6
 
 #ifndef __ASSEMBLER__
-// Segment Descriptor
+// Segment Descriptor；段描述符
 struct segdesc {
   uint lim_15_0 : 16;  // Low bits of segment limit
   uint base_15_0 : 16; // Low bits of segment base address
@@ -44,7 +47,7 @@ struct segdesc {
   uint base_31_24 : 8; // High bits of segment base address
 };
 
-// Normal segment
+// Normal segment；普通段
 #define SEG(type, base, lim, dpl) (struct segdesc)    \
 { ((lim) >> 12) & 0xffff, (uint)(base) & 0xffff,      \
   ((uint)(base) >> 16) & 0xff, type, 1, dpl, 1,       \
@@ -57,17 +60,18 @@ struct segdesc {
 
 #define DPL_USER    0x3     // User DPL
 
-// Application segment type bits
+// Application segment type bits；应用段类型位
 #define STA_X       0x8     // Executable segment
 #define STA_W       0x2     // Writeable (non-executable segments)
 #define STA_R       0x2     // Readable (executable segments)
 
-// System segment type bits
+// System segment type bits；系统段类型位
 #define STS_T32A    0x9     // Available 32-bit TSS
 #define STS_IG32    0xE     // 32-bit Interrupt Gate
 #define STS_TG32    0xF     // 32-bit Trap Gate
 
 // A virtual address 'la' has a three-part structure as follows:
+// 虚拟地址 la 分为以下三部分：页目录索引、页表索引和页内偏移。
 //
 // +--------10------+-------10-------+---------12----------+
 // | Page Directory |   Page Table   | Offset within Page  |
@@ -75,19 +79,20 @@ struct segdesc {
 // +----------------+----------------+---------------------+
 //  \--- PDX(va) --/ \--- PTX(va) --/
 
-// page directory index
+// page directory index；页目录索引
 #define PDX(va)         (((uint)(va) >> PDXSHIFT) & 0x3FF)
 
-// page table index
+// page table index；页表索引
 #define PTX(va)         (((uint)(va) >> PTXSHIFT) & 0x3FF)
 
-// construct virtual address from indexes and offset
+// construct virtual address from indexes and offset；根据索引和偏移构造虚拟地址
 #define PGADDR(d, t, o) ((uint)((d) << PDXSHIFT | (t) << PTXSHIFT | (o)))
 
 // Page directory and page table constants.
-#define NPDENTRIES      1024    // # directory entries per page directory
-#define NPTENTRIES      1024    // # PTEs per page table
-#define PGSIZE          4096    // bytes mapped by a page
+// 页目录和页表常量。
+#define NPDENTRIES      1024    // # directory entries per page directory；每个页目录的目录项数
+#define NPTENTRIES      1024    // # PTEs per page table；每个页表的 PTE 数
+#define PGSIZE          4096    // bytes mapped by a page；一个页面映射的字节数
 
 #define PTXSHIFT        12      // offset of PTX in a linear address
 #define PDXSHIFT        22      // offset of PDX in a linear address
@@ -96,10 +101,11 @@ struct segdesc {
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
 // Page table/directory entry flags.
-#define PTE_P           0x001   // Present
-#define PTE_W           0x002   // Writeable
-#define PTE_U           0x004   // User
-#define PTE_PS          0x080   // Page Size
+// 页表/页目录项标志位。
+#define PTE_P           0x001   // Present；存在
+#define PTE_W           0x002   // Writeable；可写
+#define PTE_U           0x004   // User；用户可访问
+#define PTE_PS          0x080   // Page Size；大页面
 
 // Address in page table or page directory entry
 #define PTE_ADDR(pte)   ((uint)(pte) & ~0xFFF)
@@ -108,7 +114,7 @@ struct segdesc {
 #ifndef __ASSEMBLER__
 typedef uint pte_t;
 
-// Task state segment format
+// Task state segment format；任务状态段格式
 struct taskstate {
   uint link;         // Old ts selector
   uint esp0;         // Stack pointers and segment selectors
@@ -150,6 +156,7 @@ struct taskstate {
 };
 
 // Gate descriptors for interrupts and traps
+// 中断和陷阱门描述符。
 struct gatedesc {
   uint off_15_0 : 16;   // low 16 bits of offset in segment
   uint cs : 16;         // code segment selector
@@ -163,6 +170,7 @@ struct gatedesc {
 };
 
 // Set up a normal interrupt/trap gate descriptor.
+// 设置普通中断/陷阱门描述符。
 // - istrap: 1 for a trap (= exception) gate, 0 for an interrupt gate.
 //   interrupt gate clears FL_IF, trap gate leaves FL_IF alone
 // - sel: Code segment selector for interrupt/trap handler

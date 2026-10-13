@@ -9,9 +9,9 @@ struct buf {
   uint blockno;
   struct sleeplock lock;
   uint refcnt;
-  struct buf *prev; // LRU cache list
+  struct buf *prev; // LRU cache list；LRU 缓存链表前驱
   struct buf *next;
-  struct buf *qnext; // disk queue
+  struct buf *qnext; // disk queue；磁盘请求队列后继
   uchar data[BSIZE];
 };
 #define B_VALID 0x2  // buffer has been read from disk

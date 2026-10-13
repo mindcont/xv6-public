@@ -12,27 +12,36 @@
 #include "buf.h"
 
 // Simple logging that allows concurrent FS system calls.
+// 简单的日志机制，允许文件系统系统调用并发执行。
 //
 // A log transaction contains the updates of multiple FS system
+// 一个日志事务包含多个文件系统系统调用的更新。
 // calls. The logging system only commits when there are
+// 只有在没有正在执行的文件系统系统调用时，日志系统才会提交，
 // no FS system calls active. Thus there is never
+// 因此不必判断提交是否会把未完成系统调用的更新写入磁盘。
 // any reasoning required about whether a commit might
 // write an uncommitted system call's updates to disk.
 //
 // A system call should call begin_op()/end_op() to mark
+// 系统调用应使用 begin_op()/end_op() 标记
 // its start and end. Usually begin_op() just increments
+// 开始和结束。通常 begin_op() 只会增加
 // the count of in-progress FS system calls and returns.
 // But if it thinks the log is close to running out, it
 // sleeps until the last outstanding end_op() commits.
 //
 // The log is a physical re-do log containing disk blocks.
+// 日志是保存磁盘块的物理 redo 日志。
 // The on-disk log format:
+// 磁盘上的日志格式：
 //   header block, containing block #s for block A, B, C, ...
 //   block A
 //   block B
 //   block C
 //   ...
 // Log appends are synchronous.
+// 日志追加操作是同步的。
 
 // Contents of the header block, used for both the on-disk header block
 // and to keep track in memory of logged block# before commit.
@@ -45,8 +54,8 @@ struct log {
   struct spinlock lock;
   int start;
   int size;
-  int outstanding; // how many FS sys calls are executing.
-  int committing;  // in commit(), please wait.
+  int outstanding; // how many FS sys calls are executing；正在执行的文件系统系统调用数
+  int committing;  // in commit(), please wait；正在 commit()，需要等待
   int dev;
   struct logheader lh;
 };
@@ -71,6 +80,7 @@ initlog(int dev)
 }
 
 // Copy committed blocks from log to their home location
+// 将已提交的块从日志复制到其磁盘正式位置。
 static void
 install_trans(void)
 {
@@ -87,6 +97,7 @@ install_trans(void)
 }
 
 // Read the log header from disk into the in-memory log header
+// 将磁盘日志头读取到内存中的日志头。
 static void
 read_head(void)
 {
@@ -101,8 +112,11 @@ read_head(void)
 }
 
 // Write in-memory log header to disk.
+// 将内存中的日志头写入磁盘。
 // This is the true point at which the
+// 这是真正完成
 // current transaction commits.
+// 当前事务提交的时刻。
 static void
 write_head(void)
 {

@@ -4,8 +4,11 @@
 // 所属阶段：物理内存阶段
 //
 // Physical memory allocator, intended to allocate
+// 物理内存分配器，用于分配
 // memory for user processes, kernel stacks, page table pages,
+// 用户进程、内核栈和页表页面的内存，
 // and pipe buffers. Allocates 4096-byte pages.
+// 以及管道缓冲区；每次分配 4096 字节的页面。
 
 #include "types.h"
 #include "defs.h"
@@ -15,8 +18,8 @@
 #include "spinlock.h"
 
 void freerange(void *vstart, void *vend);
-extern char end[]; // first address after kernel loaded from ELF file
-                   // defined by the kernel linker script in kernel.ld
+extern char end[]; // first address after kernel loaded from ELF file；ELF 加载内核后的第一个地址
+                   // defined by the kernel linker script in kernel.ld；由 kernel.ld 链接脚本定义
 
 struct run {
   struct run *next;
@@ -29,10 +32,15 @@ struct {
 } kmem;
 
 // Initialization happens in two phases.
+// 初始化分为两个阶段。
 // 1. main() calls kinit1() while still using entrypgdir to place just
+// 1. main() 仍使用 entrypgdir 时调用 kinit1()，只把
 // the pages mapped by entrypgdir on free list.
+// entrypgdir 映射的页面加入空闲链表。
 // 2. main() calls kinit2() with the rest of the physical pages
+// 2. 建立映射所有 CPU 的完整页表后，main() 调用 kinit2()，
 // after installing a full page table that maps them on all cores.
+// 把其余物理页面加入分配器。
 void
 kinit1(void *vstart, void *vend)
 {
@@ -58,6 +66,7 @@ freerange(void *vstart, void *vend)
 }
 //PAGEBREAK: 21
 // Free the page of physical memory pointed at by v,
+// 释放 v 指向的物理内存页面，
 // which normally should have been returned by a
 // call to kalloc().  (The exception is when
 // initializing the allocator; see kinit above.)
@@ -82,8 +91,11 @@ kfree(char *v)
 }
 
 // Allocate one 4096-byte page of physical memory.
+// 分配一个 4096 字节的物理内存页面。
 // Returns a pointer that the kernel can use.
+// 返回一个内核可以使用的指针。
 // Returns 0 if the memory cannot be allocated.
+// 如果无法分配内存，则返回 0。
 char*
 kalloc(void)
 {

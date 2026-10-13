@@ -41,6 +41,7 @@ printint(int fd, int xx, int base, int sgn)
 }
 
 // Print to the given fd. Only understands %d, %x, %p, %s.
+// 向指定文件描述符打印，只支持 %d、%x、%p 和 %s。
 void
 printf(int fd, const char *fmt, ...)
 {
@@ -81,6 +82,7 @@ printf(int fd, const char *fmt, ...)
         putc(fd, c);
       } else {
         // Unknown % sequence.  Print it to draw attention.
+        // 未知的 % 格式，打印出来以便引起注意。
         putc(fd, '%');
         putc(fd, c);
       }

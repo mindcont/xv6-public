@@ -4,13 +4,14 @@
 // 所属阶段：内核实现阶段
 //
 // Mutual exclusion lock.
+// 互斥锁。
 struct spinlock {
-  uint locked;       // Is the lock held?
+  uint locked;       // Is the lock held?；锁是否已被持有
 
-  // For debugging:
-  char *name;        // Name of lock.
-  struct cpu *cpu;   // The cpu holding the lock.
-  uint pcs[10];      // The call stack (an array of program counters)
-                     // that locked the lock.
+  // For debugging: 调试信息：
+  char *name;        // Name of lock；锁名称
+  struct cpu *cpu;   // The cpu holding the lock；持有锁的 CPU
+  uint pcs[10];      // The call stack (an array of program counters)；调用栈（程序计数器数组）
+                     // that locked the lock；获取该锁时的调用栈
 };
 

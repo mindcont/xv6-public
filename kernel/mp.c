@@ -4,7 +4,7 @@
 // 所属阶段：内核实现阶段
 //
 // Multiprocessor support
-// Search memory for MP description structures.
+// 多处理器支持：在内存中搜索 MP 描述结构。
 // http://developer.intel.com/design/pentium/datashts/24201606.pdf
 
 #include "types.h"
@@ -32,6 +32,7 @@ sum(uchar *addr, int len)
 }
 
 // Look for an MP structure in the len bytes at addr.
+// 在 addr 开始的 len 字节中查找 MP 结构。
 static struct mp*
 mpsearch1(uint a, int len)
 {
@@ -46,10 +47,14 @@ mpsearch1(uint a, int len)
 }
 
 // Search for the MP Floating Pointer Structure, which according to the
+// 搜索 MP 浮动指针结构。根据规范，它位于以下位置之一：
 // spec is in one of the following three locations:
 // 1) in the first KB of the EBDA;
+// 1）EBDA 的前 1 KB；
 // 2) in the last KB of system base memory;
+// 2）系统基本内存的最后 1 KB；
 // 3) in the BIOS ROM between 0xE0000 and 0xFFFFF.
+// 3）0xE0000 到 0xFFFFF 之间的 BIOS ROM。
 static struct mp*
 mpsearch(void)
 {
@@ -70,10 +75,15 @@ mpsearch(void)
 }
 
 // Search for an MP configuration table.  For now,
+// 搜索 MP 配置表。目前
 // don't accept the default configurations (physaddr == 0).
+// 不接受默认配置（physaddr == 0）。
 // Check for correct signature, calculate the checksum and,
+// 检查签名是否正确、计算校验和，并且
 // if correct, check the version.
+// 在校验正确时检查版本。
 // To do: check extended table checksum.
+// 待完成：检查扩展表校验和。
 static struct mpconf*
 mpconfig(struct mp **pmp)
 {
@@ -112,7 +122,7 @@ mpinit(void)
     case MPPROC:
       proc = (struct mpproc*)p;
       if(ncpu < NCPU) {
-        cpus[ncpu].apicid = proc->apicid;  // apicid may differ from ncpu
+        cpus[ncpu].apicid = proc->apicid;  // apicid may differ from ncpu；apicid 可能不同于 ncpu
         ncpu++;
       }
       p += sizeof(struct mpproc);
@@ -137,8 +147,10 @@ mpinit(void)
 
   if(mp->imcrp){
     // Bochs doesn't support IMCR, so this doesn't run on Bochs.
+    // Bochs 不支持 IMCR，因此这段代码不会在 Bochs 中执行。
     // But it would on real hardware.
-    outb(0x22, 0x70);   // Select IMCR
-    outb(0x23, inb(0x23) | 1);  // Mask external interrupts.
+    // 但在真实硬件上会执行。
+    outb(0x22, 0x70);   // Select IMCR；选择 IMCR
+    outb(0x23, inb(0x23) | 1);  // Mask external interrupts；屏蔽外部中断
   }
 }

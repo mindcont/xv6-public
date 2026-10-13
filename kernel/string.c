@@ -54,6 +54,7 @@ memmove(void *dst, const void *src, uint n)
 }
 
 // memcpy exists to placate GCC.  Use memmove.
+// 提供 memcpy 以满足 GCC 的要求；实际使用 memmove。
 void*
 memcpy(void *dst, const void *src, uint n)
 {
@@ -84,6 +85,7 @@ strncpy(char *s, const char *t, int n)
 }
 
 // Like strncpy but guaranteed to NUL-terminate.
+// 类似 strncpy，但保证以 NUL 结尾。
 char*
 safestrcpy(char *s, const char *t, int n)
 {

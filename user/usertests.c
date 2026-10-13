@@ -19,6 +19,7 @@ char *echoargv[] = { "echo", "ALL", "TESTS", "PASSED", 0 };
 int stdout = 1;
 
 // does chdir() call iput(p->cwd) in a transaction?
+// 测试 chdir() 是否在事务中调用 iput(p->cwd)。
 void
 iputtest(void)
 {
@@ -44,6 +45,7 @@ iputtest(void)
 }
 
 // does exit() call iput(p->cwd) in a transaction?
+// 测试 exit() 是否在事务中调用 iput(p->cwd)。
 void
 exitiputtest(void)
 {
@@ -76,9 +78,13 @@ exitiputtest(void)
 }
 
 // does the error path in open() for attempt to write a
+// 测试 open() 尝试写入
 // directory call iput() in a transaction?
+// 目录时的错误路径是否在事务中调用 iput()。
 // needs a hacked kernel that pauses just after the namei()
+// 该测试需要修改内核，使其在 namei()
 // call in sys_open():
+// 在 sys_open() 调用后暂停：
 //    if((ip = namei(path)) == 0)
 //      return -1;
 //    {
@@ -118,7 +124,7 @@ openiputtest(void)
   printf(stdout, "openiput test ok\n");
 }
 
-// simple file system tests
+// simple file system tests；简单文件系统测试
 
 void
 opentest(void)
@@ -305,7 +311,7 @@ exectest(void)
   }
 }
 
-// simple fork and pipe read/write
+// simple fork and pipe read/write；简单的 fork 以及管道读写测试
 
 void
 pipe1(void)
@@ -359,7 +365,7 @@ pipe1(void)
   printf(1, "pipe1 ok\n");
 }
 
-// meant to be run w/ at most two CPUs
+// meant to be run w/ at most two CPUs；设计为最多使用两个 CPU 运行
 void
 preempt(void)
 {
@@ -405,7 +411,7 @@ preempt(void)
   printf(1, "preempt ok\n");
 }
 
-// try to find any races between exit and wait
+// try to find any races between exit and wait；尝试发现 exit 和 wait 之间的竞态
 void
 exitwait(void)
 {
@@ -462,10 +468,12 @@ mem(void)
   }
 }
 
-// More file system tests
+// More file system tests；更多文件系统测试
 
 // two processes write to the same file descriptor
+// 两个进程向同一个文件描述符写入，
 // is the offset shared? does inode locking work?
+// 测试文件偏移是否共享，以及 inode 锁是否正常工作。
 void
 sharedfd(void)
 {
@@ -518,7 +526,9 @@ sharedfd(void)
 }
 
 // four processes write different files at the same
+// 四个进程同时向不同文件写入，
 // time, to test block allocation.
+// 用于测试磁盘块分配。
 void
 fourfiles(void)
 {
@@ -585,6 +595,7 @@ fourfiles(void)
 }
 
 // four processes create and delete different files in same directory
+// 四个进程在同一目录中创建和删除不同文件。
 void
 createdelete(void)
 {
@@ -658,6 +669,7 @@ createdelete(void)
 }
 
 // can I unlink a file and still read it?
+// 测试 unlink 文件后是否仍然可以读取它。
 void
 unlinkread(void)
 {
@@ -766,6 +778,7 @@ linktest(void)
 }
 
 // test concurrent create/link/unlink of the same file
+// 测试并发创建、链接和删除同一个文件。
 void
 concreate(void)
 {
@@ -858,7 +871,9 @@ concreate(void)
 }
 
 // another concurrent link/unlink/create test,
+// 另一个并发 link/unlink/create 测试，
 // to look for deadlocks.
+// 用于查找死锁。
 void
 linkunlink()
 {
@@ -893,7 +908,7 @@ linkunlink()
   printf(1, "linkunlink ok\n");
 }
 
-// directory that uses indirect blocks
+// directory that uses indirect blocks；使用间接块的目录
 void
 bigdir(void)
 {
@@ -1119,7 +1134,7 @@ subdir(void)
   printf(1, "subdir ok\n");
 }
 
-// test writes that are larger than the log.
+// test writes that are larger than the log；测试大于日志容量的写入。
 void
 bigwrite(void)
 {
@@ -1210,7 +1225,7 @@ fourteen(void)
 {
   int fd;
 
-  // DIRSIZ is 14.
+  // DIRSIZ is 14；DIRSIZ 为 14。
   printf(1, "fourteen test\n");
 
   if(mkdir("12345678901234") != 0){
@@ -1345,6 +1360,7 @@ dirfile(void)
 }
 
 // test that iput() is called at the end of _namei()
+// 测试 _namei() 结束时是否调用 iput()。
 void
 iref(void)
 {
@@ -1352,7 +1368,7 @@ iref(void)
 
   printf(1, "empty file name\n");
 
-  // the 50 is NINODE
+  // the 50 is NINODE；50 是 NINODE 的值
   for(i = 0; i < 50 + 1; i++){
     if(mkdir("irefd") != 0){
       printf(1, "mkdir irefd failed\n");
@@ -1378,9 +1394,11 @@ iref(void)
   printf(1, "empty file name OK\n");
 }
 
-// test that fork fails gracefully
+// test that fork fails gracefully；测试 fork 失败时是否正常处理
 // the forktest binary also does this, but it runs out of proc entries first.
+// forktest 二进制也执行此测试，但它会先耗尽进程表项。
 // inside the bigger usertests binary, we run out of memory first.
+// 在更大的 usertests 程序中，会先耗尽内存。
 void
 forktest(void)
 {
@@ -1426,7 +1444,7 @@ sbrktest(void)
   printf(stdout, "sbrk test\n");
   oldbrk = sbrk(0);
 
-  // can one sbrk() less than a page?
+  // can one sbrk() less than a page?；sbrk() 能否分配小于一页的空间？
   a = sbrk(0);
   int i;
   for(i = 0; i < 5000; i++){
@@ -1453,7 +1471,7 @@ sbrktest(void)
     exit();
   wait();
 
-  // can one grow address space to something big?
+  // can one grow address space to something big?；能否把地址空间扩展到很大？
 #define BIG (100*1024*1024)
   a = sbrk(0);
   amt = (BIG) - (uint)a;
@@ -1465,7 +1483,7 @@ sbrktest(void)
   lastaddr = (char*) (BIG-1);
   *lastaddr = 99;
 
-  // can one de-allocate?
+  // can one de-allocate?；能否释放地址空间？
   a = sbrk(0);
   c = sbrk(-4096);
   if(c == (char*)0xffffffff){
@@ -1478,7 +1496,7 @@ sbrktest(void)
     exit();
   }
 
-  // can one re-allocate that page?
+  // can one re-allocate that page?；能否重新分配刚才释放的页面？
   a = sbrk(0);
   c = sbrk(4096);
   if(c != a || sbrk(0) != a + 4096){
@@ -1486,7 +1504,7 @@ sbrktest(void)
     exit();
   }
   if(*lastaddr == 99){
-    // should be zero
+    // should be zero；这里应该为 0
     printf(stdout, "sbrk de-allocation didn't really deallocate\n");
     exit();
   }
@@ -1498,7 +1516,7 @@ sbrktest(void)
     exit();
   }
 
-  // can we read the kernel's memory?
+  // can we read the kernel's memory?；测试用户态能否读取内核内存。
   for(a = (char*)(KERNBASE); a < (char*) (KERNBASE+2000000); a += 50000){
     ppid = getpid();
     pid = fork();
@@ -1515,24 +1533,26 @@ sbrktest(void)
   }
 
   // if we run the system out of memory, does it clean up the last
-  // failed allocation?
+  // 如果耗尽系统内存，系统是否会清理最后一次
+  // failed allocation?；失败的分配？
   if(pipe(fds) != 0){
     printf(1, "pipe() failed\n");
     exit();
   }
   for(i = 0; i < sizeof(pids)/sizeof(pids[0]); i++){
     if((pids[i] = fork()) == 0){
-      // allocate a lot of memory
+      // allocate a lot of memory；分配大量内存
       sbrk(BIG - (uint)sbrk(0));
       write(fds[1], "x", 1);
-      // sit around until killed
+      // sit around until killed；等待直到被杀死
       for(;;) sleep(1000);
     }
     if(pids[i] != -1)
       read(fds[0], &scratch, 1);
   }
   // if those failed allocations freed up the pages they did allocate,
-  // we'll be able to allocate here
+  // 如果失败的分配释放了已经分配的页面，
+  // we'll be able to allocate here；这里就应该还能继续分配。
   c = sbrk(4096);
   for(i = 0; i < sizeof(pids)/sizeof(pids[0]); i++){
     if(pids[i] == -1)
@@ -1576,6 +1596,7 @@ validatetest(void)
   for(p = 0; p <= (uint)hi; p += 4096){
     if((pid = fork()) == 0){
       // try to crash the kernel by passing in a badly placed integer
+      // 尝试传入位置非法的整数，让内核崩溃。
       validateint((int*)p);
       exit();
     }
@@ -1585,6 +1606,7 @@ validatetest(void)
     wait();
 
     // try to crash the kernel by passing in a bad string pointer
+    // 尝试传入非法字符串指针，让内核崩溃。
     if(link("nosuchfile", (char*)p) != -1){
       printf(stdout, "link should not succeed\n");
       exit();
@@ -1594,7 +1616,7 @@ validatetest(void)
   printf(stdout, "validate ok\n");
 }
 
-// does unintialized data start out zero?
+// does unintialized data start out zero?；未初始化数据是否从 0 开始？
 char uninit[10000];
 void
 bsstest(void)
@@ -1612,8 +1634,11 @@ bsstest(void)
 }
 
 // does exec return an error if the arguments
+// 如果参数
 // are larger than a page? or does it write
+// 大于一页，exec 是否返回错误，还是会写入
 // below the stack and wreck the instructions/data?
+// 栈下方并破坏指令或数据？
 void
 bigargtest(void)
 {
@@ -1648,7 +1673,9 @@ bigargtest(void)
 }
 
 // what happens when the file system runs out of blocks?
+// 文件系统耗尽磁盘块时会发生什么？
 // answer: balloc panics, so this test is not useful.
+// 答案：balloc 会触发 panic，因此这个测试没有实际意义。
 void
 fsfull()
 {

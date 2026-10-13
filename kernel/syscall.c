@@ -13,12 +13,18 @@
 #include "syscall.h"
 
 // User code makes a system call with INT T_SYSCALL.
+// 用户代码通过 INT T_SYSCALL 发起系统调用。
 // System call number in %eax.
+// 系统调用号保存在 %eax 中。
 // Arguments on the stack, from the user call to the C
+// 参数位于用户栈上，从用户调用传递到 C
 // library system call function. The saved user %esp points
+// 库中的系统调用函数。保存的用户 %esp 先指向
 // to a saved program counter, and then the first argument.
+// 保存的程序计数器，再指向第一个参数。
 
 // Fetch the int at addr from the current process.
+// 从当前进程地址空间的 addr 处读取一个整数。
 int
 fetchint(uint addr, int *ip)
 {
@@ -31,8 +37,11 @@ fetchint(uint addr, int *ip)
 }
 
 // Fetch the nul-terminated string at addr from the current process.
+// 从当前进程读取 addr 处的 NUL 结尾字符串。
 // Doesn't actually copy the string - just sets *pp to point at it.
+// 函数不会复制字符串，只让 *pp 指向它。
 // Returns length of string, not including nul.
+// 返回不包含 NUL 字符的字符串长度。
 int
 fetchstr(uint addr, char **pp)
 {
@@ -51,6 +60,7 @@ fetchstr(uint addr, char **pp)
 }
 
 // Fetch the nth 32-bit system call argument.
+// 获取第 n 个 32 位系统调用参数。
 int
 argint(int n, int *ip)
 {
@@ -58,8 +68,11 @@ argint(int n, int *ip)
 }
 
 // Fetch the nth word-sized system call argument as a pointer
+// 将第 n 个字长系统调用参数作为指针读取，
 // to a block of memory of size bytes.  Check that the pointer
+// 它指向大小为 bytes 的内存块，并检查该指针
 // lies within the process address space.
+// 是否位于进程地址空间内。
 int
 argptr(int n, char **pp, int size)
 {
@@ -75,8 +88,11 @@ argptr(int n, char **pp, int size)
 }
 
 // Fetch the nth word-sized system call argument as a string pointer.
+// 将第 n 个字长系统调用参数作为字符串指针读取。
 // Check that the pointer is valid and the string is nul-terminated.
+// 检查指针有效且字符串以 NUL 结尾。
 // (There is no shared writable memory, so the string can't change
+// 不存在共享可写内存，因此字符串不会在检查后被修改，
 // between this check and being used by the kernel.)
 int
 argstr(int n, char **pp)

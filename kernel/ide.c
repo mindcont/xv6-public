@@ -4,6 +4,7 @@
 // 所属阶段：磁盘驱动阶段
 //
 // Simple PIO-based (non-DMA) IDE driver code.
+// 基于 PIO、非 DMA 的简单 IDE 驱动。
 
 #include "types.h"
 #include "defs.h"
@@ -30,8 +31,11 @@
 #define IDE_CMD_WRMUL 0xc5
 
 // idequeue points to the buf now being read/written to the disk.
+// idequeue 指向当前正在与磁盘读写的 buf。
 // idequeue->qnext points to the next buf to be processed.
+// idequeue->qnext 指向下一个待处理的 buf。
 // You must hold idelock while manipulating queue.
+// 操作队列时必须持有 idelock。
 
 static struct spinlock idelock;
 static struct buf *idequeue;
@@ -40,6 +44,7 @@ static int havedisk1;
 static void idestart(struct buf*);
 
 // Wait for IDE disk to become ready.
+// 等待 IDE 磁盘就绪。
 static int
 idewait(int checkerr)
 {
@@ -61,7 +66,7 @@ ideinit(void)
   ioapicenable(IRQ_IDE, ncpu - 1);
   idewait(0);
 
-  // Check if disk 1 is present
+  // Check if disk 1 is present；检查磁盘 1 是否存在
   outb(0x1f6, 0xe0 | (1<<4));
   for(i=0; i<1000; i++){
     if(inb(0x1f7) != 0){
@@ -70,11 +75,12 @@ ideinit(void)
     }
   }
 
-  // Switch back to disk 0.
+  // Switch back to disk 0. 切回磁盘 0。
   outb(0x1f6, 0xe0 | (0<<4));
 }
 
 // Start the request for b.  Caller must hold idelock.
+// 启动 b 的磁盘请求；调用者必须持有 idelock。
 static void
 idestart(struct buf *b)
 {
@@ -105,12 +111,14 @@ idestart(struct buf *b)
 }
 
 // Interrupt handler.
+// 中断处理函数。
 void
 ideintr(void)
 {
   struct buf *b;
 
   // First queued buffer is the active request.
+  // 队列中的第一个缓存是当前活动请求。
   acquire(&idelock);
 
   if((b = idequeue) == 0){
@@ -119,16 +127,16 @@ ideintr(void)
   }
   idequeue = b->qnext;
 
-  // Read data if needed.
+  // Read data if needed. 如有需要则读取数据。
   if(!(b->flags & B_DIRTY) && idewait(1) >= 0)
     insl(0x1f0, b->data, BSIZE/4);
 
-  // Wake process waiting for this buf.
+  // Wake process waiting for this buf. 唤醒正在等待此 buf 的进程。
   b->flags |= B_VALID;
   b->flags &= ~B_DIRTY;
   wakeup(b);
 
-  // Start disk on next buf in queue.
+  // Start disk on next buf in queue. 启动队列中下一个 buf 的磁盘操作。
   if(idequeue != 0)
     idestart(idequeue);
 
@@ -137,8 +145,11 @@ ideintr(void)
 
 //PAGEBREAK!
 // Sync buf with disk.
+// 同步 buf 与磁盘中的内容。
 // If B_DIRTY is set, write buf to disk, clear B_DIRTY, set B_VALID.
+// 如果设置了 B_DIRTY，则写回磁盘、清除 B_DIRTY 并设置 B_VALID。
 // Else if B_VALID is not set, read buf from disk, set B_VALID.
+// 否则如果未设置 B_VALID，则从磁盘读取 buf 并设置 B_VALID。
 void
 iderw(struct buf *b)
 {

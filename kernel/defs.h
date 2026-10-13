@@ -15,22 +15,22 @@ struct sleeplock;
 struct stat;
 struct superblock;
 
-// bio.c
+// bio.c；块缓存
 void            binit(void);
 struct buf*     bread(uint, uint);
 void            brelse(struct buf*);
 void            bwrite(struct buf*);
 
-// console.c
+// console.c；控制台和键盘输入输出
 void            consoleinit(void);
 void            cprintf(char*, ...);
 void            consoleintr(int(*)(void));
 void            panic(char*) __attribute__((noreturn));
 
-// exec.c
+// exec.c；ELF 用户程序加载
 int             exec(char*, char**);
 
-// file.c
+// file.c；文件对象和文件描述符
 struct file*    filealloc(void);
 void            fileclose(struct file*);
 struct file*    filedup(struct file*);
@@ -39,7 +39,7 @@ int             fileread(struct file*, char*, int n);
 int             filestat(struct file*, struct stat*);
 int             filewrite(struct file*, char*, int n);
 
-// fs.c
+// fs.c；inode、目录和文件内容
 void            readsb(int dev, struct superblock *sb);
 int             dirlink(struct inode*, char*, uint);
 struct inode*   dirlookup(struct inode*, char*, uint*);
@@ -58,26 +58,26 @@ int             readi(struct inode*, char*, uint, uint);
 void            stati(struct inode*, struct stat*);
 int             writei(struct inode*, char*, uint, uint);
 
-// ide.c
+// ide.c；IDE 磁盘驱动
 void            ideinit(void);
 void            ideintr(void);
 void            iderw(struct buf*);
 
-// ioapic.c
+// ioapic.c；I/O APIC 中断控制器
 void            ioapicenable(int irq, int cpu);
 extern uchar    ioapicid;
 void            ioapicinit(void);
 
-// kalloc.c
+// kalloc.c；物理页面分配器
 char*           kalloc(void);
 void            kfree(char*);
 void            kinit1(void*, void*);
 void            kinit2(void*, void*);
 
-// kbd.c
+// kbd.c；键盘扫描码处理
 void            kbdintr(void);
 
-// lapic.c
+// lapic.c；Local APIC 和定时器
 void            cmostime(struct rtcdate *r);
 int             lapicid(void);
 extern volatile uint*    lapic;
@@ -86,28 +86,28 @@ void            lapicinit(void);
 void            lapicstartap(uchar, uint);
 void            microdelay(int);
 
-// log.c
+// log.c；文件系统日志
 void            initlog(int dev);
 void            log_write(struct buf*);
 void            begin_op();
 void            end_op();
 
-// mp.c
+// mp.c；多处理器配置
 extern int      ismp;
 void            mpinit(void);
 
-// picirq.c
+// picirq.c；旧式 PIC 控制器
 void            picenable(int);
 void            picinit(void);
 
-// pipe.c
+// pipe.c；管道
 int             pipealloc(struct file**, struct file**);
 void            pipeclose(struct pipe*, int);
 int             piperead(struct pipe*, char*, int);
 int             pipewrite(struct pipe*, char*, int);
 
 //PAGEBREAK: 16
-// proc.c
+// proc.c；进程、调度和睡眠唤醒
 int             cpuid(void);
 void            exit(void);
 int             fork(void);
@@ -126,10 +126,10 @@ int             wait(void);
 void            wakeup(void*);
 void            yield(void);
 
-// swtch.S
+// swtch.S；上下文切换汇编实现
 void            swtch(struct context**, struct context*);
 
-// spinlock.c
+// spinlock.c；自旋锁
 void            acquire(struct spinlock*);
 void            getcallerpcs(void*, uint*);
 int             holding(struct spinlock*);
@@ -138,13 +138,13 @@ void            release(struct spinlock*);
 void            pushcli(void);
 void            popcli(void);
 
-// sleeplock.c
+// sleeplock.c；可睡眠锁
 void            acquiresleep(struct sleeplock*);
 void            releasesleep(struct sleeplock*);
 int             holdingsleep(struct sleeplock*);
 void            initsleeplock(struct sleeplock*, char*);
 
-// string.c
+// string.c；内核字符串函数
 int             memcmp(const void*, const void*, uint);
 void*           memmove(void*, const void*, uint);
 void*           memset(void*, int, uint);
@@ -153,7 +153,7 @@ int             strlen(const char*);
 int             strncmp(const char*, const char*, uint);
 char*           strncpy(char*, const char*, int);
 
-// syscall.c
+// syscall.c；系统调用分派和参数读取
 int             argint(int, int*);
 int             argptr(int, char**, int);
 int             argstr(int, char**);
@@ -161,21 +161,21 @@ int             fetchint(uint, int*);
 int             fetchstr(uint, char**);
 void            syscall(void);
 
-// timer.c
+// timer.c；时钟中断
 void            timerinit(void);
 
-// trap.c
+// trap.c；陷阱和中断处理
 void            idtinit(void);
 extern uint     ticks;
 void            tvinit(void);
 extern struct spinlock tickslock;
 
-// uart.c
+// uart.c；串口驱动
 void            uartinit(void);
 void            uartintr(void);
 void            uartputc(int);
 
-// vm.c
+// vm.c；虚拟内存和页表
 void            seginit(void);
 void            kvmalloc(void);
 pde_t*          setupkvm(void);
@@ -191,5 +191,5 @@ void            switchkvm(void);
 int             copyout(pde_t*, uint, void*, uint);
 void            clearpteu(pde_t *pgdir, char *uva);
 
-// number of elements in fixed-size array
+// number of elements in fixed-size array；固定大小数组的元素数量
 #define NELEM(x) (sizeof(x)/sizeof((x)[0]))

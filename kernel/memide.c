@@ -4,7 +4,9 @@
 // 所属阶段：内核实现阶段
 //
 // Fake IDE disk; stores blocks in memory.
+// 虚拟 IDE 磁盘；把磁盘块存储在内存中。
 // Useful for running kernel without scratch disk.
+// 用于没有真实磁盘时运行内核。
 
 #include "types.h"
 #include "defs.h"
@@ -31,15 +33,19 @@ ideinit(void)
 }
 
 // Interrupt handler.
+// 中断处理函数。
 void
 ideintr(void)
 {
-  // no-op
+  // no-op；空操作
 }
 
 // Sync buf with disk.
+// 同步 buf 与磁盘内容。
 // If B_DIRTY is set, write buf to disk, clear B_DIRTY, set B_VALID.
+// 如果设置 B_DIRTY，则写入磁盘、清除 B_DIRTY 并设置 B_VALID。
 // Else if B_VALID is not set, read buf from disk, set B_VALID.
+// 否则如果未设置 B_VALID，则从磁盘读取 buf 并设置 B_VALID。
 void
 iderw(struct buf *b)
 {

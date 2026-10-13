@@ -39,25 +39,30 @@ struct context {
 
 enum procstate { UNUSED, EMBRYO, SLEEPING, RUNNABLE, RUNNING, ZOMBIE };
 
-// Per-process state
+// Per-process state；每个进程的状态
 struct proc {
-  uint sz;                     // Size of process memory (bytes)
-  pde_t* pgdir;                // Page table
-  char *kstack;                // Bottom of kernel stack for this process
-  enum procstate state;        // Process state
-  int pid;                     // Process ID
-  struct proc *parent;         // Parent process
-  struct trapframe *tf;        // Trap frame for current syscall
-  struct context *context;     // swtch() here to run process
-  void *chan;                  // If non-zero, sleeping on chan
-  int killed;                  // If non-zero, have been killed
-  struct file *ofile[NOFILE];  // Open files
-  struct inode *cwd;           // Current directory
-  char name[16];               // Process name (debugging)
+  uint sz;                     // Size of process memory (bytes)；进程内存大小（字节）
+  pde_t* pgdir;                // Page table；页表
+  char *kstack;                // Bottom of kernel stack for this process；该进程内核栈底
+  enum procstate state;        // Process state；进程状态
+  int pid;                     // Process ID；进程 ID
+  struct proc *parent;         // Parent process；父进程
+  struct trapframe *tf;        // Trap frame for current syscall；当前系统调用的陷阱帧
+  struct context *context;     // swtch() here to run process；通过 swtch() 切换到此处运行进程
+  void *chan;                  // If non-zero, sleeping on chan；非零时表示正在该通道睡眠
+  int killed;                  // If non-zero, have been killed；非零时表示已被杀死
+  struct file *ofile[NOFILE];  // Open files；打开的文件
+  struct inode *cwd;           // Current directory；当前目录
+  char name[16];               // Process name (debugging)；进程名（调试用）
 };
 
 // Process memory is laid out contiguously, low addresses first:
+// 进程内存从低地址到高地址连续布局：
 //   text
+//   代码段
 //   original data and bss
+//   初始数据段和 BSS 段
 //   fixed-size stack
+//   固定大小的栈
 //   expandable heap
+//   可扩展的堆

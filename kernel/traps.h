@@ -4,8 +4,10 @@
 // 所属阶段：内核实现阶段
 //
 // x86 trap and interrupt constants.
+// x86 陷阱和中断常量。
 
 // Processor-defined:
+// 处理器定义的异常号：
 #define T_DIVIDE         0      // divide error
 #define T_DEBUG          1      // debug exception
 #define T_NMI            2      // non-maskable interrupt
@@ -28,7 +30,9 @@
 #define T_SIMDERR       19      // SIMD floating point error
 
 // These are arbitrarily chosen, but with care not to overlap
+// 下面的编号由 xv6 自行选择，但不能与
 // processor defined exceptions or interrupt vectors.
+// 处理器定义的异常或中断向量重叠。
 #define T_SYSCALL       64      // system call
 #define T_DEFAULT      500      // catchall
 
